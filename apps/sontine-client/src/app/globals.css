@@ -1,26 +1,79 @@
-@import "tailwindcss";
+/* Import Tailwind CSS v4 with Sontine configuration */
+@import "@repo/tailwind-config/shared-styles.css";
 
+/* Import Solana Wallet Adapter CSS */
+/* @import "@solana/wallet-adapter-react-ui/styles.css"; */
+
+/* Sontine app specific styles */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --sontine-primary: #00B49F;
+  --sontine-primary-dark: #00A08A;
+  --sontine-secondary: #6B7280;
+  --sontine-background: #ffffff;
+  --sontine-surface: #F9FAFB;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--sontine-background);
+  color: #1f2937;
+  font-family: var(--font-inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sontine-primary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sontine-primary-dark);
+}
+
+/* Focus styles for accessibility */
+.focus\:ring-sontine:focus {
+  --tw-ring-color: var(--sontine-primary);
+  --tw-ring-opacity: 0.5;
+}
+
+/* Wallet Adapter Button Overrides */
+.wallet-adapter-button-wrapper {
+  width: 100%;
+}
+
+.wallet-adapter-button {
+  width: 100% !important;
+  background-color: var(--sontine-primary) !important;
+  border-radius: 0.5rem !important;
+  height: 3rem !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: var(--sontine-primary-dark) !important;
+}
+
+.wallet-adapter-button-start-icon {
+  margin-right: 0.5rem !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  z-index: 9999 !important;
+}
+
+.wallet-adapter-modal {
+  border-radius: 1rem !important;
+}
+
+.wallet-adapter-modal-title {
+  color: var(--sontine-primary) !important;
 }

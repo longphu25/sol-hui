@@ -4,14 +4,16 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:client": "turbo run dev --filter=sontine-client",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "gen": "turbo gen workspace"
   },
   "devDependencies": {
     "prettier": "^3.6.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "turbo": "^2.5.5"
+    "turbo": "^2.5.6"
   },
   "engines": {
     "node": ">=18"
