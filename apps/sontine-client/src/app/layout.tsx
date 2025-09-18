@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { fontClasses } from "../lib/fonts";
 import { AppProviders } from "@/components/app-providers";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
@@ -20,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+    <html lang="en" className={fontClasses.variable}>
+      <body className={`${inter.variable} ${fontClasses.sans} antialiased`}>
         <AppProviders>
           <AuthGuard>
-            {children}
+        {children}
           </AuthGuard>
         </AppProviders>
       </body>

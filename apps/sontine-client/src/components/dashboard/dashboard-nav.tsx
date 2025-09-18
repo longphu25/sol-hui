@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/components/auth/auth-provider';
 import { Home, Users, Wallet, User, Settings, LogOut } from 'lucide-react';
 import { AppText } from '@/components/ui/app-text';
@@ -33,11 +34,7 @@ export function DashboardNav() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white p-2 rounded-lg">
-                <div className="w-6 h-6 flex items-center justify-center font-bold text-sm">
-                  S
-                </div>
-              </div>
+              <Image src="/images/icon.png" alt="Sontine Logo" width={32} height={32} className="w-full h-full object-contain" />
               <AppText variant="headlineSmall" className="text-[#00B49F] font-bold">
                 Sontine
               </AppText>

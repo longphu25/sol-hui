@@ -5,6 +5,8 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dev:client": "turbo run dev --filter=sontine-client",
+    "build:client": "turbo run build --filter=sontine-client",
+    "lint:client": "turbo run lint --filter=sontine-client",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

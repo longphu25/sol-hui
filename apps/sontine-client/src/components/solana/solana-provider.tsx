@@ -5,8 +5,6 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
   PhantomWalletAdapter,
-  SolflareWalletAdapter,
-  CoinbaseWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { useCluster } from '@/components/cluster/cluster-provider';
 
@@ -23,8 +21,8 @@ export function SolanaProvider({ children }: SolanaProviderProps) {
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
-      new CoinbaseWalletAdapter(),
+      // new SolflareWalletAdapter(),
+      // new CoinbaseWalletAdapter(),
     ],
     []
   );

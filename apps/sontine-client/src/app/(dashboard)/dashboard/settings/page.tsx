@@ -1,223 +1,142 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Bell, Shield, Palette } from 'lucide-react';
+import React from 'react';
+import { Settings, User, Network, Bug, ArrowRight } from 'lucide-react';
+import { AppText } from '@/components/ui/app-text';
+import { SontineCard, SontineCardContent, SontineCardHeader } from '@/components/ui/sontine-card';
+import { SontineButton } from '@/components/ui/sontine-button';
+import { SettingsAppConfig } from '@/components/settings/settings-app-config';
+import { SettingsUiAccount } from '@/components/settings/settings-ui-account';
+import { SettingsUiCluster } from '@/components/settings/settings-ui-cluster';
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState({
-    notifications: {
-      email: true,
-      push: false,
-      tontineUpdates: true,
-      payoutReminders: true,
+  const settingsSections = [
+    {
+      title: 'Account & Wallet',
+      description: 'Manage your wallet connection and account settings',
+      icon: User,
+      color: '#00B49F',
+      component: <SettingsUiAccount />,
     },
-    privacy: {
-      profileVisible: true,
-      showWalletAddress: false,
+    {
+      title: 'App Configuration',
+      description: 'Configure app preferences and behavior',
+      icon: Settings,
+      color: '#6366F1',
+      component: <SettingsAppConfig />,
     },
-    appearance: {
-      theme: 'light',
-      language: 'en',
+    {
+      title: 'Network & Cluster',
+      description: 'Select Solana network and RPC endpoint',
+      icon: Network,
+      color: '#8B5CF6',
+      component: <SettingsUiCluster />,
     },
-  });
+  ];
 
-  const handleNotificationChange = (key: string, value: boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [key]: value,
-      },
-    }));
-  };
-
-  const handlePrivacyChange = (key: string, value: boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: value,
-      },
-    }));
-  };
-
-  const handleAppearanceChange = (key: string, value: string) => {
-    setSettings(prev => ({
-      ...prev,
-      appearance: {
-        ...prev.appearance,
-        [key]: value,
-      },
-    }));
-  };
+  const developerTools = [
+    {
+      title: 'Demo & Testing',
+      description: 'Access development tools and component demos',
+      icon: Bug,
+      color: '#F59E0B',
+      href: '/dashboard/settings/demo',
+    },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your preferences and account settings</p>
+      <div className="mb-8">
+        <AppText variant="displaySmall" className="text-gray-900 mb-2">
+          Settings
+        </AppText>
+        <AppText variant="bodyLarge" className="text-gray-600">
+          Configure your account, app preferences, and network settings
+        </AppText>
       </div>
 
-      {/* Notifications */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Bell className="h-5 w-5 text-[#00B49F]" />
-          <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+      <div className="space-y-6">
+        {/* Settings Sections */}
+        {settingsSections.map((section, index) => {
+          const IconComponent = section.icon;
+          return (
+            <SontineCard key={index} variant="elevated" padding="none">
+              {/* Section Header */}
+              <SontineCardHeader className="flex flex-row items-center space-x-4 p-6 pb-4">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: `${section.color}20` }}
+                >
+                  <IconComponent size={24} color={section.color} />
+                </div>
+                <div className="flex-1">
+                  <AppText variant="titleMedium" className="text-gray-900 mb-1">
+                    {section.title}
+                  </AppText>
+                  <AppText variant="bodyMedium" className="text-gray-600">
+                    {section.description}
+                  </AppText>
+                </div>
+              </SontineCardHeader>
+
+              {/* Section Content */}
+              <SontineCardContent className="px-6 pb-6">
+                {section.component}
+              </SontineCardContent>
+            </SontineCard>
+          );
+        })}
+
+        {/* Developer Tools Section */}
+        <div className="mt-12">
+          <AppText variant="titleLarge" className="text-gray-900 mb-6">
+            Developer Tools
+          </AppText>
+
+          {developerTools.map((tool, index) => {
+            const IconComponent = tool.icon;
+            return (
+              <SontineCard key={index} variant="elevated" padding="md">
+                <SontineButton
+                  variant="ghost"
+                  size="lg"
+                  fullWidth
+                  onClick={() => window.location.href = tool.href}
+                  className="justify-start p-0 h-auto"
+                >
+                  <div className="flex items-center space-x-4 w-full py-2">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${tool.color}20` }}
+                    >
+                      <IconComponent size={24} color={tool.color} />
+                    </div>
+
+                    <div className="flex-1 text-left">
+                      <AppText variant="titleSmall" className="text-gray-900 mb-1">
+                        {tool.title}
+                      </AppText>
+                      <AppText variant="bodySmall" className="text-gray-600">
+                        {tool.description}
+                      </AppText>
+                    </div>
+
+                    <ArrowRight size={16} className="text-gray-400" />
+                  </div>
+                </SontineButton>
+              </SontineCard>
+            );
+          })}
         </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Email Notifications</h3>
-              <p className="text-sm text-gray-600">Receive notifications via email</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.notifications.email}
-                onChange={(e) => handleNotificationChange('email', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#00B49F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B49F]"></div>
-            </label>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Push Notifications</h3>
-              <p className="text-sm text-gray-600">Receive push notifications in your browser</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.notifications.push}
-                onChange={(e) => handleNotificationChange('push', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#00B49F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B49F]"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Tontine Updates</h3>
-              <p className="text-sm text-gray-600">Get notified about tontine activities</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.notifications.tontineUpdates}
-                onChange={(e) => handleNotificationChange('tontineUpdates', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#00B49F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B49F]"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Payout Reminders</h3>
-              <p className="text-sm text-gray-600">Reminders for upcoming payouts</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.notifications.payoutReminders}
-                onChange={(e) => handleNotificationChange('payoutReminders', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#00B49F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B49F]"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Privacy */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Shield className="h-5 w-5 text-[#00B49F]" />
-          <h2 className="text-lg font-semibold text-gray-900">Privacy</h2>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Profile Visibility</h3>
-              <p className="text-sm text-gray-600">Make your profile visible to other users</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.privacy.profileVisible}
-                onChange={(e) => handlePrivacyChange('profileVisible', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#00B49F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B49F]"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Show Wallet Address</h3>
-              <p className="text-sm text-gray-600">Display your wallet address on your profile</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.privacy.showWalletAddress}
-                onChange={(e) => handlePrivacyChange('showWalletAddress', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#00B49F]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B49F]"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Appearance */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Palette className="h-5 w-5 text-[#00B49F]" />
-          <h2 className="text-lg font-semibold text-gray-900">Appearance</h2>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Theme
-            </label>
-            <select
-              value={settings.appearance.theme}
-              onChange={(e) => handleAppearanceChange('theme', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B49F] focus:border-transparent outline-none"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Language
-            </label>
-            <select
-              value={settings.appearance.language}
-              onChange={(e) => handleAppearanceChange('language', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B49F] focus:border-transparent outline-none"
-            >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <button className="bg-[#00B49F] text-white px-6 py-2 rounded-lg hover:bg-[#00A08A] transition-colors">
-          Save Settings
-        </button>
+        {/* Footer Info */}
+        <SontineCard variant="outlined" padding="md" className="mt-12">
+          <AppText variant="bodySmall" className="text-gray-500 text-center leading-6">
+            Configure app info and clusters in{' '}
+            <span className="text-[#00B49F] font-medium">constants/app-config.tsx</span>
+          </AppText>
+        </SontineCard>
       </div>
     </div>
   );
