@@ -97,17 +97,17 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Account</h1>
-          <p className="text-gray-600 mt-1">Manage your wallet and view transaction history</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Account</h1>
+          <p className="text-lg text-gray-600">Manage your wallet and view transaction history</p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          className="flex items-center space-x-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 bg-white/70 backdrop-blur-sm"
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
@@ -115,17 +115,17 @@ export default function AccountPage() {
       </div>
 
       {/* Wallet Overview */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Wallet Overview</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Wallet Overview</h2>
           <div className="flex items-center space-x-2 text-green-600">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium">Connected</span>
           </div>
         </div>
 
         {/* Wallet Address */}
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Wallet Address</div>
@@ -157,43 +157,43 @@ export default function AccountPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <a
             href="/dashboard/account/send"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex flex-col items-center p-6 border border-gray-200 rounded-xl hover:bg-gradient-to-br hover:from-[#00B49F]/10 hover:to-[#00A08A]/10 hover:border-[#00B49F]/30 transition-all duration-200 group"
           >
-            <Send className="h-6 w-6 text-[#00B49F] mb-2" />
+            <Send className="h-8 w-8 text-[#00B49F] mb-3 group-hover:scale-110 transition-transform" />
             <span className="text-sm font-medium text-gray-900">Send</span>
           </a>
           <a
             href="/dashboard/account/receive"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex flex-col items-center p-6 border border-gray-200 rounded-xl hover:bg-gradient-to-br hover:from-[#00B49F]/10 hover:to-[#00A08A]/10 hover:border-[#00B49F]/30 transition-all duration-200 group"
           >
-            <Download className="h-6 w-6 text-[#00B49F] mb-2" />
+            <Download className="h-8 w-8 text-[#00B49F] mb-3 group-hover:scale-110 transition-transform" />
             <span className="text-sm font-medium text-gray-900">Receive</span>
           </a>
           <a
             href="/dashboard/account/airdrop"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex flex-col items-center p-6 border border-gray-200 rounded-xl hover:bg-gradient-to-br hover:from-[#00B49F]/10 hover:to-[#00A08A]/10 hover:border-[#00B49F]/30 transition-all duration-200 group"
           >
-            <Zap className="h-6 w-6 text-[#00B49F] mb-2" />
+            <Zap className="h-8 w-8 text-[#00B49F] mb-3 group-hover:scale-110 transition-transform" />
             <span className="text-sm font-medium text-gray-900">Airdrop</span>
           </a>
           <a
             href="/dashboard/tontines"
-            className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex flex-col items-center p-6 border border-gray-200 rounded-xl hover:bg-gradient-to-br hover:from-[#00B49F]/10 hover:to-[#00A08A]/10 hover:border-[#00B49F]/30 transition-all duration-200 group"
           >
-            <DollarSign className="h-6 w-6 text-[#00B49F] mb-2" />
+            <DollarSign className="h-8 w-8 text-[#00B49F] mb-3 group-hover:scale-110 transition-transform" />
             <span className="text-sm font-medium text-gray-900">Tontines</span>
           </a>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="flex border-b border-gray-200">
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20">
+        <div className="flex border-b border-gray-200/50">
           {[
             { key: 'overview', label: 'Overview' },
             { key: 'transactions', label: 'Transactions' },

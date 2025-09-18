@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
 import { Home, Users, Wallet, User, Settings, LogOut } from 'lucide-react';
+import { AppText } from '@/components/ui/app-text';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -26,64 +27,77 @@ export function DashboardNav() {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200">
+    <nav className="bg-white/95 backdrop-blur-sm border-b border-white/20 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/dashboard" className="text-2xl font-bold text-[#00B49F]">
-              Sontine
+            <Link href="/dashboard" className="flex items-center space-x-2">
+              <div className="bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white p-2 rounded-lg">
+                <div className="w-6 h-6 flex items-center justify-center font-bold text-sm">
+                  S
+                </div>
+              </div>
+              <AppText variant="headlineSmall" className="text-[#00B49F] font-bold">
+                Sontine
+              </AppText>
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-2">
             {navItems.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive(href)
-                    ? 'text-[#00B49F] bg-[#00B49F]/10'
-                    : 'text-gray-600 hover:text-[#00B49F] hover:bg-[#00B49F]/5'
+                    ? 'text-white bg-gradient-to-r from-[#00B49F] to-[#00A08A] shadow-md'
+                    : 'text-gray-600 hover:text-[#00B49F] hover:bg-[#00B49F]/10'
                 }`}
               >
                 <Icon size={18} />
-                <span>{label}</span>
+                <AppText variant="labelLarge" className="text-inherit">
+                  {label}
+                </AppText>
               </Link>
             ))}
           </div>
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
-              {account?.displayAddress || account?.address}
-            </span>
+            <div className="hidden sm:block">
+              <AppText variant="labelMedium" className="text-gray-600">
+                {account?.displayAddress || account?.address}
+              </AppText>
+            </div>
             <button
               onClick={signOut}
-              className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
             >
               <LogOut size={18} />
-              <span>Disconnect</span>
+              <span className="hidden sm:inline">Disconnect</span>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-gray-200">
+        <div className="md:hidden border-t border-gray-200/50">
           <div className="flex justify-around py-2">
             {navItems.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className={`flex flex-col items-center py-2 px-3 text-xs ${
+                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                   isActive(href)
-                    ? 'text-[#00B49F]'
-                    : 'text-gray-600'
+                    ? 'text-[#00B49F] bg-[#00B49F]/10'
+                    : 'text-gray-600 hover:text-[#00B49F]'
                 }`}
               >
                 <Icon size={20} />
-                <span className="mt-1">{label}</span>
+                <AppText variant="labelSmall" className="mt-1 text-inherit">
+                  {label}
+                </AppText>
               </Link>
             ))}
           </div>

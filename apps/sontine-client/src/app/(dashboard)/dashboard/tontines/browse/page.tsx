@@ -224,49 +224,57 @@ export default function BrowseTontinesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Browse Tontines</h1>
-          <p className="text-gray-600 mt-1">Discover and join tontine groups in your community</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Browse Tontines</h1>
+          <p className="text-lg text-gray-600">Discover and join tontine groups in your community</p>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <a
+            href="/dashboard/tontines/create"
+            className="bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+          >
+            Create Group
+          </a>
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center space-x-2 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 bg-white/70 backdrop-blur-sm"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="space-y-4">
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
+        <div className="space-y-6">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               type="text"
               placeholder="Search tontine groups..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B49F] focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00B49F] focus:border-transparent bg-white/70 text-lg"
             />
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {filters.map((filter) => {
               const isSelected = selectedFilter === filter.key;
               return (
                 <button
                   key={filter.key}
                   onClick={() => setSelectedFilter(filter.key as typeof selectedFilter)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isSelected
-                      ? 'bg-[#00B49F] text-white'
+                      ? 'bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -320,44 +328,44 @@ export default function BrowseTontinesPage() {
         ) : (
           <div className="grid gap-6">
             {filteredTontines.map((tontine) => (
-              <div key={tontine.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div key={tontine.id} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-200">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{tontine.name}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{tontine.description}</p>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1">{tontine.name}</h3>
+                    <p className="text-gray-600">{tontine.description}</p>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tontine.status)}`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(tontine.status)}`}>
                     {tontine.status}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{tontine.members} members</span>
+                    <Users className="h-5 w-5 text-[#00B49F]" />
+                    <span className="text-sm text-gray-700 font-medium">{tontine.members} members</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">${tontine.totalAmount.toFixed(2)}</span>
+                    <DollarSign className="h-5 w-5 text-[#00B49F]" />
+                    <span className="text-sm text-gray-700 font-medium">${tontine.totalAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">Round {tontine.currentRound}/{tontine.totalRounds}</span>
+                    <Calendar className="h-5 w-5 text-[#00B49F]" />
+                    <span className="text-sm text-gray-700 font-medium">Round {tontine.currentRound}/{tontine.totalRounds}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">${tontine.contributionAmount.toFixed(2)}/round</span>
+                    <DollarSign className="h-5 w-5 text-[#00B49F]" />
+                    <span className="text-sm text-gray-700 font-medium">${tontine.contributionAmount.toFixed(2)}/round</span>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                   <div className="text-sm text-gray-500">
                     Group ID: {tontine.gid}
                   </div>
                   <div className="flex space-x-2">
                     <a
                       href={`/dashboard/tontines/${tontine.id}`}
-                      className="text-[#00B49F] hover:underline text-sm font-medium"
+                      className="bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white px-4 py-2 rounded-lg hover:shadow-md transition-all duration-200 text-sm font-medium"
                     >
                       View Details →
                     </a>
