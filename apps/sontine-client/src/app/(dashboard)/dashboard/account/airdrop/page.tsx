@@ -1,43 +1,109 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ArrowLeft, Zap, AlertCircle, CheckCircle, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { useWebWallet } from '@/components/solana/use-web-wallet';
+import { useWalletData } from '@/components/wallet/wallet-provider';
+import { useCluster } from '@/components/cluster/cluster-provider';
+import { ClusterNetwork } from '@/constants/app-config';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 export default function AirdropPage() {
-  const [isRequesting, setIsRequesting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-  const [transactionHash, setTransactionHash] = useState('');
+  // Get wallet data and functions
+  const { account } = useWebWallet();
+  const {
+    balance,
+    isRequestingAirdrop,
+    airdropError,
+    lastAirdropTx,
+    requestAirdrop,
+  } = useWalletData();
+  const { selectedCluster } = useCluster();
+  
+  const isMainnet = selectedCluster.network === ClusterNetwork.Mainnet;
+  const currentSOLBalance = balance?.sol || 0;
 
-  // Mock wallet data
-  const walletAddress = 'CKaKwfq1BjKHMHZmzmeZQoWbNFjbyCgHMLunajcm5DEL';
-  const currentSOLBalance = 0.5;
-
-  const requestAirdrop = async () => {
-    setError('');
-    setIsRequesting(true);
-
+  const handleAirdrop = async () => {
     try {
-      // Simulate airdrop request
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Mock transaction hash
-      const mockTxHash = 'TxHash123abcdef456789';
-      setTransactionHash(mockTxHash);
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to request airdrop');
-    } finally {
-      setIsRequesting(false);
+      await requestAirdrop(1);
+    } catch (error) {
+      // Error is handled by the wallet context
+      console.error('Airdrop failed:', error);
     }
   };
 
   const resetAirdrop = () => {
-    setSuccess(false);
-    setError('');
-    setTransactionHash('');
+    // This will be handled by the next airdrop request
   };
+
+  // Show wallet connection prompt if not connected
+  if (!account?.publicKey) {
+    return (
+      <div className="space-y-6">
+        {/* Back button */}
+        <Link
+          href="/dashboard/account"
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Account</span>
+        </Link>
+
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">SOL Airdrop</h1>
+          <p className="text-gray-600 mt-1">Request free SOL tokens for transaction fees (Testnet only)</p>
+        </div>
+
+        {/* Connect Wallet */}
+        <div className="flex flex-col items-center justify-center min-h-96 space-y-4">
+          <Zap className="h-16 w-16 text-gray-400" />
+          <h2 className="text-xl font-semibold text-gray-900">Connect Your Wallet</h2>
+          <p className="text-gray-600 text-center max-w-md">
+            Connect your Solana wallet to request SOL airdrops for transaction fees.
+          </p>
+          <WalletMultiButton />
+        </div>
+      </div>
+    );
+  }
+
+  // Show mainnet warning
+  if (isMainnet) {
+    return (
+      <div className="space-y-6">
+        {/* Back button */}
+        <Link
+          href="/dashboard/account"
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Account</span>
+        </Link>
+
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">SOL Airdrop</h1>
+          <p className="text-gray-600 mt-1">Request free SOL tokens for transaction fees (Testnet only)</p>
+        </div>
+
+        {/* Mainnet Warning */}
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start space-x-2">
+            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Mainnet Not Supported</h3>
+              <p className="text-sm text-red-700 mt-1">
+                Airdrops are only available on testnet/devnet. Please switch to devnet to request SOL airdrops.
+                For mainnet SOL, you need to purchase from a cryptocurrency exchange.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -57,7 +123,7 @@ export default function AirdropPage() {
       </div>
 
       {/* Success State */}
-      {success && (
+      {lastAirdropTx && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
           <div className="flex items-center space-x-3 mb-4">
             <CheckCircle className="h-8 w-8 text-green-500" />
@@ -67,25 +133,23 @@ export default function AirdropPage() {
             </div>
           </div>
           
-          {transactionHash && (
-            <div className="bg-white rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-gray-600">Transaction Hash</div>
-                  <div className="font-mono text-sm text-gray-900">{transactionHash}</div>
-                </div>
-                <a
-                  href={`https://solscan.io/tx/${transactionHash}?cluster=devnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-1 text-[#00B49F] hover:text-[#00A08A] transition-colors"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="text-sm">View on Solscan</span>
-                </a>
+          <div className="bg-white rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-gray-600">Transaction Hash</div>
+                <div className="font-mono text-sm text-gray-900">{lastAirdropTx}</div>
               </div>
+              <a
+                href={`https://solscan.io/tx/${lastAirdropTx}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-1 text-[#00B49F] hover:text-[#00A08A] transition-colors"
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span className="text-sm">View on Solscan</span>
+              </a>
             </div>
-          )}
+          </div>
 
           <button
             onClick={resetAirdrop}
@@ -97,7 +161,7 @@ export default function AirdropPage() {
       )}
 
       {/* Main Airdrop Interface */}
-      {!success && (
+      {!lastAirdropTx && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="text-center space-y-6">
             {/* Airdrop Icon */}
@@ -121,19 +185,19 @@ export default function AirdropPage() {
 
             {/* Request Button */}
             <button
-              onClick={requestAirdrop}
-              disabled={isRequesting}
+              onClick={handleAirdrop}
+              disabled={isRequestingAirdrop}
               className="w-full bg-[#00B49F] text-white py-3 rounded-lg hover:bg-[#00A08A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               <Zap className="h-5 w-5" />
-              <span>{isRequesting ? 'Requesting Airdrop...' : 'Request 1 SOL Airdrop'}</span>
+              <span>{isRequestingAirdrop ? 'Requesting Airdrop...' : 'Request 1 SOL Airdrop'}</span>
             </button>
 
             {/* Error Message */}
-            {error && (
+            {airdropError && (
               <div className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <AlertCircle className="h-5 w-5 text-red-500" />
-                <span className="text-sm text-red-700">{error}</span>
+                <span className="text-sm text-red-700">{airdropError}</span>
               </div>
             )}
           </div>
@@ -147,12 +211,14 @@ export default function AirdropPage() {
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Wallet Address</span>
             <span className="font-mono text-sm text-gray-900">
-              {walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}
+              {account.displayAddress}
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Network</span>
-            <span className="font-medium text-gray-900">Solana Devnet</span>
+            <span className="font-medium text-gray-900">
+              {selectedCluster.name} ({isMainnet ? 'Mainnet' : 'Testnet/Devnet'})
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Current SOL Balance</span>

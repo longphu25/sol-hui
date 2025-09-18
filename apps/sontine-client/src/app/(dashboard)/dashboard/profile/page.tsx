@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   User, 
   Send, 
@@ -18,6 +19,8 @@ import { SontineButton } from '@/components/ui/sontine-button';
 import { ProfileHeader } from '@/components/profile/profile-header';
 
 export default function ProfilePage() {
+  const router = useRouter();
+  
   const menuItems = [
     {
       title: 'Account Overview',
@@ -94,7 +97,7 @@ export default function ProfilePage() {
                     variant="ghost"
                     size="lg"
                     fullWidth
-                    onClick={() => window.location.href = item.route}
+                    onClick={() => router.push(item.route)}
                     className="justify-start p-0 h-auto"
                   >
                     <div className="flex items-center space-x-4 w-full py-4 px-4">

@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/components/auth/auth-provider';
+import { useWebWallet } from '@/components/solana/use-web-wallet';
 
 export default function SendPage() {
   const [recipientAddress, setRecipientAddress] = useState('');
@@ -10,6 +12,49 @@ export default function SendPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  
+  const { isAuthenticated } = useAuth();
+  const { account, connected } = useWebWallet();
+
+  // Check if wallet is connected
+  useEffect(() => {
+    if (!isAuthenticated || !connected || !account) {
+      setError('Please connect your wallet to send transactions');
+    } else {
+      setError('');
+    }
+  }, [isAuthenticated, connected, account]);
+
+  // Show wallet connection prompt if not connected
+  if (!connected || !account) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href="/dashboard/account"
+          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Account</span>
+        </Link>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+          <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Wallet Not Connected</h1>
+          <p className="text-gray-600 mb-6">
+            Please connect your Solana wallet to send USDC transactions.
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-[#00B49F] text-white px-6 py-3 rounded-lg hover:bg-[#00A08A] transition-colors"
+            >
+              Refresh & Connect Wallet
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +62,11 @@ export default function SendPage() {
     setIsLoading(true);
 
     try {
+      // Check wallet connection first
+      if (!connected || !account) {
+        throw new Error('Please connect your wallet first');
+      }
+
       // Validate inputs
       if (!recipientAddress.trim()) {
         throw new Error('Please enter a recipient address');
@@ -87,6 +137,14 @@ export default function SendPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Send USDC</h1>
         <p className="text-gray-600 mt-1">Send USDC tokens to another wallet address</p>
+        
+        {/* Wallet Status */}
+        <div className="mt-3 flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <span className="text-sm text-gray-600">
+            Wallet {connected ? 'Connected' : 'Disconnected'}: {account?.displayAddress || 'Not connected'}
+          </span>
+        </div>
       </div>
 
       {/* Send Form */}

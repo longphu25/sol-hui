@@ -1,258 +1,391 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Users, Calendar, ArrowLeft, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import React from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import {
+  Users,
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Link as LinkIcon,
+  Activity as ActivityIcon,
+} from 'lucide-react';
+import { useAuth } from '@/components/auth/auth-provider';
+import { useLocalTontines } from '@/hooks/use-local-tontines';
+import { getMockTontineById } from '@/utils/mock-tontines';
+import { ellipsify } from '@/utils/ellipsify';
+import type { Tontine, TontineStatus } from '@/types/tontine';
 
-// Mock data for demonstration - in real app, this would come from blockchain
-const mockGroupData = {
-  groupId: 1001,
-  contributionAmount: 100, // USDC
-  maxMembers: 10,
-  currentMembers: 8,
-  currentRound: 3,
-  totalRounds: 10,
-  status: { active: {} },
-  selectionMethod: { auction: {} },
-  admin: 'AdminWallet123...',
+interface StatusMeta {
+  label: string;
+  bgClass: string;
+  textClass: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  description: string;
+  canJoin: boolean;
+}
+
+const statusMeta: Record<TontineStatus | 'pending', StatusMeta> = {
+  active: {
+    label: 'Active',
+    bgClass: 'bg-green-100',
+    textClass: 'text-green-700',
+    icon: CheckCircle2,
+    description: 'Rounds are currently running for this tontine.',
+    canJoin: false,
+  },
+  forming: {
+    label: 'Forming',
+    bgClass: 'bg-amber-100',
+    textClass: 'text-amber-700',
+    icon: Clock,
+    description: 'The group is accepting new members before the first round.',
+    canJoin: true,
+  },
+  pending: {
+    label: 'Pending',
+    bgClass: 'bg-yellow-100',
+    textClass: 'text-yellow-700',
+    icon: Clock,
+    description: 'Setup is in progress. Membership may still be open.',
+    canJoin: true,
+  },
+  completed: {
+    label: 'Completed',
+    bgClass: 'bg-blue-100',
+    textClass: 'text-blue-700',
+    icon: CheckCircle2,
+    description: 'All rounds have been completed for this tontine.',
+    canJoin: false,
+  },
+  paused: {
+    label: 'Paused',
+    bgClass: 'bg-orange-100',
+    textClass: 'text-orange-700',
+    icon: AlertCircle,
+    description: 'Rounds are temporarily paused by the organizer.',
+    canJoin: false,
+  },
+  cancelled: {
+    label: 'Cancelled',
+    bgClass: 'bg-red-100',
+    textClass: 'text-red-700',
+    icon: AlertCircle,
+    description: 'This tontine has been cancelled.',
+    canJoin: false,
+  },
 };
 
-const mockMemberAccount = true; // User is a member
+function getStatusInfo(status: TontineStatus | 'pending'): StatusMeta {
+  return statusMeta[status] ?? statusMeta.pending;
+}
+
+function buildActivityFeed(tontine: Tontine, isLocal: boolean, memberCount: number) {
+  if (isLocal) {
+    const createdAt = tontine.createdAt ? new Date(tontine.createdAt).toLocaleString() : 'Recently';
+    return [
+      {
+        title: 'Group created',
+        subtitle: tontine.createdBy ? `Created by ${ellipsify(tontine.createdBy, 6)}` : 'Draft stored locally',
+        timestamp: createdAt,
+      },
+      {
+        title: 'Member roster',
+        subtitle: `${memberCount} participant${memberCount === 1 ? '' : 's'} currently added`,
+        timestamp: 'Synced locally',
+      },
+    ];
+  }
+
+  return [
+    {
+      title: 'Contract deployed',
+      subtitle: 'Deployed on Solana devnet',
+      timestamp: '2024-06-01',
+    },
+    {
+      title: 'Latest round update',
+      subtitle: `Round ${tontine.currentRound} of ${tontine.totalRounds} in progress`,
+      timestamp: '2024-06-15',
+    },
+  ];
+}
 
 export default function TontineDetailPage() {
   const params = useParams();
   const groupAddress = params.id as string;
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'activity'>('overview');
-  const [isLoading] = useState(false);
 
-  const groupData = mockGroupData;
-  const isUserMember = mockMemberAccount;
-  const contributionAmount = groupData.contributionAmount;
-  const totalAmount = contributionAmount * groupData.maxMembers;
+  const { account } = useAuth();
+  const walletAddress = account?.address ?? null;
 
-  // Get status information
-  const getStatusInfo = (status: unknown) => {
-    if (typeof status === 'object' && status !== null) {
-      const statusObj = status as Record<string, unknown>;
-      if ('active' in statusObj) {
-        return {
-          label: 'Active',
-          color: 'text-green-600',
-          bgColor: 'bg-green-100',
-          icon: CheckCircle,
-          canJoin: false,
-          description: 'Group is actively running rounds',
-        };
-      }
-      if ('forming' in statusObj) {
-        return {
-          label: 'Forming',
-          color: 'text-yellow-600',
-          bgColor: 'bg-yellow-100',
-          icon: Clock,
-          canJoin: true,
-          description: 'Group is still accepting new members',
-        };
-      }
-      if ('completed' in statusObj) {
-        return {
-          label: 'Completed',
-          color: 'text-blue-600',
-          bgColor: 'bg-blue-100',
-          icon: CheckCircle,
-          canJoin: false,
-          description: 'All rounds have been completed',
-        };
-      }
+  const { getTontineById, joinTontine } = useLocalTontines();
+  const localTontine = getTontineById(groupAddress);
+  const remoteTontine = localTontine ? null : getMockTontineById(groupAddress);
+  const tontine = localTontine ?? remoteTontine;
+
+  const [feedback, setFeedback] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  React.useEffect(() => {
+    if (!feedback) return;
+    const timeout = window.setTimeout(() => setFeedback(null), 3200);
+    return () => window.clearTimeout(timeout);
+  }, [feedback]);
+
+  const selectionMethodLabel = React.useMemo(() => {
+    const method = tontine?.settings?.selectionMethod;
+    switch (method) {
+      case 'random':
+        return 'Random selection';
+      case 'fixedOrder':
+        return 'Fixed order selection';
+      case 'auction':
+        return 'Auction selection';
+      default:
+        return null;
     }
-    return {
-      label: 'Unknown',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-100',
-      icon: AlertCircle,
-      canJoin: false,
-      description: 'Status unknown',
-    };
-  };
+  }, [tontine?.settings?.selectionMethod]);
 
-  const statusInfo = getStatusInfo(groupData.status);
-  const StatusIcon = statusInfo.icon;
+  const cycleDurationLabel = React.useMemo(() => {
+    const cycle = tontine?.settings?.cycleDuration;
+    if (!cycle) return null;
+    if (cycle === 'custom') {
+      const days = tontine?.settings?.customDurationDays ?? null;
+      if (!days) return 'Custom cycle';
+      return `${days} day cycle`;
+    }
+    return `${cycle.charAt(0).toUpperCase()}${cycle.slice(1)} cycle`;
+  }, [tontine?.settings?.cycleDuration, tontine?.settings?.customDurationDays]);
 
-  if (isLoading) {
+  if (!tontine) {
     return (
-      <div className="flex justify-center items-center min-h-96">
-        <div className="text-gray-600">Loading group data...</div>
+      <div className="space-y-6">
+        <Link
+          href="/dashboard/tontines/browse"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to browse
+        </Link>
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-6 py-12 text-center">
+          <Users className="h-10 w-10 mx-auto text-gray-400 mb-4" />
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Group not found</h1>
+          <p className="text-gray-600">
+            We could not locate that tontine. It may have been removed or lives on-chain only.
+          </p>
+        </div>
       </div>
     );
   }
 
+  const isLocal = tontine.source === 'local';
+  const statusInfo = getStatusInfo(tontine.status);
+  const StatusIcon = statusInfo.icon;
+
+  const memberList = isLocal
+    ? localTontine?.memberAddresses ?? []
+    : Array.from({ length: tontine.members }, (_, index) => `Member ${index + 1}`);
+
+  const isMember = isLocal && walletAddress ? memberList.includes(walletAddress) : false;
+  const isFull = isLocal && localTontine ? memberList.length >= localTontine.maxMembers : false;
+
+  const activityFeed = buildActivityFeed(tontine, isLocal, memberList.length);
+
+  const handleJoin = () => {
+    if (!localTontine) return;
+    const result = joinTontine(localTontine.id, walletAddress ?? undefined);
+
+    if (result.success) {
+      setFeedback({ type: 'success', text: 'You have joined this tontine.' });
+      return;
+    }
+
+    switch (result.reason) {
+      case 'WALLET_REQUIRED':
+        setFeedback({ type: 'error', text: 'Connect your wallet to join this tontine.' });
+        break;
+      case 'ALREADY_JOINED':
+        setFeedback({ type: 'error', text: 'You are already a member of this tontine.' });
+        break;
+      case 'GROUP_FULL':
+        setFeedback({ type: 'error', text: 'This tontine is already full.' });
+        break;
+      default:
+        setFeedback({ type: 'error', text: 'Unable to join the tontine right now.' });
+    }
+  };
+
+  const contractAddress = tontine.contractAddress ?? tontine.id;
+
   return (
     <div className="space-y-6">
-      {/* Back button */}
       <Link
         href="/dashboard/tontines/browse"
-        className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+        className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Back to Browse</span>
+        Back to browse
       </Link>
 
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-start mb-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Tontine #{groupData.groupId}</h1>
-            <p className="text-gray-600 mt-1">Group Address: {groupAddress.slice(0, 8)}...</p>
+            <h1 className="text-3xl font-semibold text-gray-900">{tontine.name}</h1>
+            <p className="text-gray-600 mt-1">Contract: {ellipsify(contractAddress, 8)}</p>
+            <p className="text-gray-600 mt-1">Group ID: {tontine.gid}</p>
           </div>
-          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg ${statusInfo.bgColor}`}>
-            <StatusIcon className={`h-4 w-4 ${statusInfo.color}`} />
-            <span className={`text-sm font-medium ${statusInfo.color}`}>{statusInfo.label}</span>
+          <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-full ${statusInfo.bgClass}`}>
+            <StatusIcon className={`h-4 w-4 ${statusInfo.textClass}`} />
+            <span className={`text-sm font-medium ${statusInfo.textClass}`}>{statusInfo.label}</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{groupData.currentMembers}</div>
-            <div className="text-sm text-gray-600">Current Members</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="rounded-xl bg-gray-50 px-4 py-3">
+            <p className="text-xs uppercase text-gray-500">Members</p>
+            <p className="text-xl font-semibold text-gray-900">{memberList.length}</p>
+            {isLocal && localTontine && (
+              <p className="text-xs text-gray-500">Capacity {memberList.length}/{localTontine.maxMembers}</p>
+            )}
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">${totalAmount.toFixed(2)}</div>
-            <div className="text-sm text-gray-600">Total Pool</div>
+          <div className="rounded-xl bg-gray-50 px-4 py-3">
+            <p className="text-xs uppercase text-gray-500">Contribution</p>
+            <p className="text-xl font-semibold text-gray-900">${tontine.contributionAmount.toFixed(2)}</p>
+            <p className="text-xs text-gray-500">Per round</p>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{groupData.currentRound}</div>
-            <div className="text-sm text-gray-600">Current Round</div>
+          <div className="rounded-xl bg-gray-50 px-4 py-3">
+            <p className="text-xs uppercase text-gray-500">Total Pool</p>
+            <p className="text-xl font-semibold text-gray-900">${tontine.totalAmount.toFixed(2)}</p>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">${contributionAmount.toFixed(2)}</div>
-            <div className="text-sm text-gray-600">Per Round</div>
+          <div className="rounded-xl bg-gray-50 px-4 py-3">
+            <p className="text-xs uppercase text-gray-500">Round</p>
+            <p className="text-xl font-semibold text-gray-900">
+              {tontine.currentRound}/{tontine.totalRounds}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Membership Status */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        {isUserMember ? (
-          <div className="flex items-center justify-center space-x-3 text-[#00B49F]">
-            <CheckCircle className="h-6 w-6" />
-            <span className="text-lg font-medium">You are a member of this group</span>
-          </div>
-        ) : statusInfo.canJoin ? (
-          <div className="text-center space-y-4">
-            <div className="text-gray-900 text-lg font-medium">Join this tontine group</div>
-            <button className="bg-[#00B49F] text-white px-6 py-3 rounded-lg hover:bg-[#00A08A] transition-colors">
-              Join Group
-            </button>
-          </div>
+      {feedback && (
+        <div
+          className={`rounded-xl border px-4 py-3 text-sm font-medium ${
+            feedback.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {feedback.text}
+        </div>
+      )}
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <h2 className="text-xl font-semibold text-gray-900">Membership</h2>
+        {isLocal ? (
+          isMember ? (
+            <div className="flex items-center gap-2 text-[#00B49F] font-medium">
+              <CheckCircle2 className="h-5 w-5" />
+              You are a member of this tontine
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <p className="text-gray-600">{statusInfo.description}</p>
+              <button
+                type="button"
+                onClick={handleJoin}
+                disabled={!statusInfo.canJoin || isFull}
+                className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  !statusInfo.canJoin || isFull
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white hover:shadow-md'
+                }`}
+              >
+                {isFull ? 'Group full' : 'Join tontine'}
+              </button>
+            </div>
+          )
         ) : (
-          <div className="text-center space-y-2">
-            <div className="text-gray-900 text-lg font-medium">Group {statusInfo.label}</div>
-            <p className="text-gray-600">{statusInfo.description}</p>
+          <div className="text-gray-600 text-sm">
+            On-chain tontines can be joined from your connected wallet once the integration is available.
           </div>
         )}
       </div>
 
-      {/* Round Information */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Round Information</h2>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">Round Progress</span>
-            <span className="font-medium">
-              {groupData.currentRound} of {groupData.totalRounds}
-            </span>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">Contract details</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Contribution</span>
+              <span className="font-medium">${tontine.contributionAmount.toFixed(2)} USDC / round</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Total pool</span>
+              <span className="font-medium">${tontine.totalAmount.toFixed(2)} USDC</span>
+            </div>
+            {selectionMethodLabel && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Selection method</span>
+                <span className="font-medium">{selectionMethodLabel}</span>
+              </div>
+            )}
+            {cycleDurationLabel && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Cycle duration</span>
+                <span className="font-medium">{cycleDurationLabel}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Max members</span>
+              <span className="font-medium">{tontine.maxMembers ?? '—'}</span>
+            </div>
+            {tontine.createdBy && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Creator</span>
+                <span className="font-medium">{ellipsify(tontine.createdBy, 6)}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-500">Contract</span>
+              <span className="inline-flex items-center gap-2 font-medium">
+                <LinkIcon className="h-4 w-4 text-[#00B49F]" />
+                {ellipsify(contractAddress, 8)}
+              </span>
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-[#00B49F] h-2 rounded-full"
-              style={{
-                width: `${(groupData.currentRound / groupData.totalRounds) * 100}%`,
-              }}
-            ></div>
-          </div>
-          <div className="flex justify-between items-center text-sm text-gray-600">
-            <span>Round {groupData.currentRound}</span>
-            <span>{groupData.totalRounds - groupData.currentRound} rounds remaining</span>
-          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900">Members</h2>
+          <ul className="mt-4 space-y-3 text-sm text-gray-700">
+            {memberList.length === 0 ? (
+              <li className="text-gray-500">No members added yet.</li>
+            ) : (
+              memberList.map((member, index) => (
+                <li key={`${member}-${index}`} className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-[#00B49F]" />
+                  <span>{isLocal ? ellipsify(member, 6) : member}</span>
+                </li>
+              ))
+            )}
+          </ul>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="flex border-b border-gray-200">
-          {[
-            { key: 'overview', label: 'Overview', icon: AlertCircle },
-            { key: 'members', label: 'Members', icon: Users },
-            { key: 'activity', label: 'Activity', icon: Calendar },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as typeof activeTab)}
-              className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'text-[#00B49F] border-b-2 border-[#00B49F]'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <ActivityIcon className="h-5 w-5 text-[#00B49F]" /> Activity history
+        </h2>
+        <div className="mt-4 space-y-4">
+          {activityFeed.map((entry, index) => (
+            <div key={`${entry.title}-${index}`} className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Details</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Organizer</span>
-                    <span className="font-medium">{groupData.admin.slice(0, 8)}...</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Contribution Amount</span>
-                    <span className="font-medium">${contributionAmount.toFixed(2)} USDC</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Max Members</span>
-                    <span className="font-medium">{groupData.maxMembers}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Selection Method</span>
-                    <span className="font-medium">
-                      {typeof groupData.selectionMethod === 'object' && 'auction' in groupData.selectionMethod
-                        ? 'Auction'
-                        : 'Unknown'}
-                    </span>
-                  </div>
-                </div>
+                <p className="text-sm font-medium text-gray-900">{entry.title}</p>
+                <p className="text-sm text-gray-600">{entry.subtitle}</p>
               </div>
+              <p className="text-xs uppercase tracking-wide text-gray-400 mt-2 md:mt-0">{entry.timestamp}</p>
             </div>
-          )}
-
-          {activeTab === 'members' && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Members ({groupData.currentMembers})</h3>
-              <div className="text-gray-600">
-                Member list will be available once connected to the blockchain.
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'activity' && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Activity History</h3>
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <div className="text-gray-600">
-                  Activity history will be available once the group becomes active
-                </div>
-              </div>
-            </div>
-          )}
+          ))}
         </div>
       </div>
     </div>

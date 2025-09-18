@@ -13,9 +13,10 @@ export default function SignInPage() {
   const { signIn } = useAuth();
   const { connected } = useWallet();
   const router = useRouter();
+  const hasAttemptedAutoSign = React.useRef(false);
 
   const handleSignIn = React.useCallback(async () => {
-    if (!connected) {
+    if (!connected || isLoading) {
       // The wallet connection will be handled by WalletMultiButton
       return;
     }
@@ -29,14 +30,20 @@ export default function SignInPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [connected, signIn, router]);
+  }, [connected, isLoading, signIn, router]);
 
   // Auto sign-in when wallet is connected
   React.useEffect(() => {
-    if (connected && !isLoading) {
-      handleSignIn();
+    if (!connected) {
+      hasAttemptedAutoSign.current = false;
+      return;
     }
-  }, [connected, isLoading, handleSignIn]);
+
+    if (hasAttemptedAutoSign.current) return;
+
+    hasAttemptedAutoSign.current = true;
+    void handleSignIn();
+  }, [connected, handleSignIn]);
 
   const features = [
     {

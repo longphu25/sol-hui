@@ -6,6 +6,7 @@ import { ThemeProvider } from './theme-provider';
 import { AuthProvider } from './auth/auth-provider';
 import { ClusterProvider } from './cluster/cluster-provider';
 import { SolanaProvider } from './solana/solana-provider';
+import { WalletProvider } from './wallet/wallet-provider';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -27,9 +28,11 @@ export function AppProviders({ children }: AppProvidersProps) {
       <ThemeProvider>
         <ClusterProvider>
           <SolanaProvider>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
+            <WalletProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </WalletProvider>
           </SolanaProvider>
         </ClusterProvider>
       </ThemeProvider>

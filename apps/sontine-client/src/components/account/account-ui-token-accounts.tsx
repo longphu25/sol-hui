@@ -51,7 +51,7 @@ export function AccountUiTokenAccounts({ address }: AccountUiTokenAccountsProps)
 
   const isLoading = false;
   const isError = false;
-  const error = null;
+  // const error = null;
 
   const ellipsify = (str: string, len: number = 4) => {
     if (str.length > 30) {
