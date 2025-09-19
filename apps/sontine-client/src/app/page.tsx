@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
+import { AppShell } from '@/components/app-shell';
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -20,11 +21,13 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00B49F]"></div>
-      </div>
+      <AppShell>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00B49F]"></div>
+        </div>
+      </AppShell>
     );
   }
 
-  return null;
+  return <AppShell>{null}</AppShell>;
 }

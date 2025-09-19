@@ -1,5 +1,4 @@
-import { useAuthorization } from '@/components/solana/use-authorization'
-import { useMobileWallet } from '@/components/solana/use-mobile-wallet'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js'
 import { useMemo } from 'react'
 
@@ -10,24 +9,23 @@ export interface AnchorWallet {
 }
 
 export function useAnchorWallet(): AnchorWallet | undefined {
-  const { selectedAccount } = useAuthorization()
-  const mobileWallet = useMobileWallet()
+  const { publicKey, signTransaction, signAllTransactions } = useWallet()
+
   return useMemo(() => {
-    if (!selectedAccount) {
-      return
+    if (!publicKey || !signTransaction || !signAllTransactions) {
+      return undefined
     }
 
     return {
+      publicKey,
       signTransaction: async <T extends Transaction | VersionedTransaction>(transaction: T) => {
-        const signedTransaction = await mobileWallet.signTransaction(transaction)
-        return signedTransaction
+        const signed = await signTransaction(transaction as Transaction)
+        return signed as T
       },
       signAllTransactions: async <T extends Transaction | VersionedTransaction>(transactions: T[]) => {
-        return await mobileWallet.signAllTransactions(transactions)
-      },
-      get publicKey() {
-        return selectedAccount.publicKey
+        const signed = await signAllTransactions(transactions as Transaction[])
+        return signed as T[]
       },
     }
-  }, [mobileWallet, selectedAccount])
+  }, [publicKey, signAllTransactions, signTransaction])
 }

@@ -42,8 +42,20 @@ interface WalletProviderProps {
   children: ReactNode;
 }
 
+function useOptionalConnection() {
+  try {
+    return useConnection();
+  } catch {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[WalletProvider] ConnectionProvider not found; skipping wallet context initialisation');
+    }
+    return null;
+  }
+}
+
 export function WalletProvider({ children }: WalletProviderProps) {
-  const { connection } = useConnection();
+  const connectionState = useOptionalConnection();
+  const connection = connectionState?.connection ?? null;
   const { account, connected } = useWebWallet();
   const { selectedCluster } = useCluster();
   
@@ -65,12 +77,12 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const [lastAirdropTx, setLastAirdropTx] = useState<string | null>(null);
 
   // Service instance
-  const solanaService = useMemo(() => new SolanaService(connection), [connection]);
+  const solanaService = useMemo(() => (connection ? new SolanaService(connection) : null), [connection]);
   const isMainnet = selectedCluster.network === ClusterNetwork.Mainnet;
 
   // Refresh functions
   const refreshBalance = useCallback(async () => {
-    if (!account?.publicKey || !connected) {
+    if (!account?.publicKey || !connected || !solanaService) {
       setBalance(null);
       setBalanceError(null);
       return;
@@ -92,7 +104,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   }, [account?.publicKey, connected, solanaService, isMainnet]);
 
   const refreshTransactions = useCallback(async () => {
-    if (!account?.publicKey || !connected) {
+    if (!account?.publicKey || !connected || !solanaService) {
       setTransactions([]);
       setTransactionsError(null);
       return;
@@ -114,7 +126,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   }, [account?.publicKey, connected, solanaService]);
 
   const refreshSummary = useCallback(async () => {
-    if (!account?.publicKey || !connected) {
+    if (!account?.publicKey || !connected || !solanaService) {
       setSummary(null);
       setSummaryError(null);
       return;
@@ -136,7 +148,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   }, [account?.publicKey, connected, solanaService]);
 
   const requestAirdrop = useCallback(async (amount = 1): Promise<string> => {
-    if (!account?.publicKey || !connected) {
+    if (!account?.publicKey || !connected || !solanaService) {
       throw new Error('Wallet not connected');
     }
 

@@ -6,6 +6,18 @@ import { Users, Calendar, DollarSign, Plus, ArrowRight, Sparkles } from 'lucide-
 import { useAuth } from '@/components/auth/auth-provider';
 import { CreateTontineModal } from '@/components/tontines/create-tontine-modal';
 import { useLocalTontines, CreateTontineInput } from '@/hooks/use-local-tontines';
+import {
+  MemberAccountView,
+  useSontineProgram,
+  useWalletMemberAccounts,
+} from '@/hooks/use-sontine-porgram';
+import type { Tontine } from '@/types/tontine';
+import { ellipsify } from '@/utils/ellipsify';
+import {
+  mapGroupViewToTontine,
+  toAnchorCycleDuration,
+  toAnchorSelectionMethod,
+} from '@/utils/tontine-mappers';
 
 const statusClassMap: Record<string, string> = {
   active: 'bg-green-100 text-green-700',
@@ -20,11 +32,14 @@ function TontineSummaryCard({
   tontine,
   label,
 }: {
-  tontine: ReturnType<typeof useLocalTontines>['tontines'][number];
+  tontine: Tontine;
   label: string;
 }) {
   const statusClass = statusClassMap[tontine.status] ?? 'bg-gray-100 text-gray-700';
-  const memberLabel = `${tontine.members}/${tontine.maxMembers} members`;
+  const maxMembers = tontine.maxMembers ?? tontine.totalRounds;
+  const memberLabel = `${tontine.members}/${maxMembers} members`;
+  const gid = String(tontine.gid ?? tontine.id);
+  const groupIdLabel = gid.length > 24 ? ellipsify(gid, 4) : gid;
   const selectionLabel = (() => {
     switch (tontine.settings?.selectionMethod) {
       case 'random':
@@ -53,7 +68,7 @@ function TontineSummaryCard({
         <div>
           <div className="text-xs uppercase tracking-wide text-gray-400">{label}</div>
           <h3 className="text-xl font-semibold text-gray-900 mt-1">{tontine.name}</h3>
-          <p className="text-gray-600 text-sm mt-2">{tontine.description}</p>
+          <p className="text-gray-600 text-sm mt-2">{tontine.description || 'On-chain tontine group'}</p>
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-gray-500">
             {selectionLabel && <span className="rounded-full bg-gray-100 px-2 py-1">{selectionLabel}</span>}
             {cycleLabel && <span className="rounded-full bg-gray-100 px-2 py-1">{cycleLabel}</span>}
@@ -82,7 +97,7 @@ function TontineSummaryCard({
       </div>
 
       <div className="flex justify-between items-center text-sm text-gray-500">
-        <span>Group ID: {tontine.gid}</span>
+        <span>Group ID: {groupIdLabel}</span>
         <Link
           href={`/dashboard/tontines/${tontine.id}`}
           className="inline-flex items-center gap-1 text-[#00B49F] font-medium hover:underline"
@@ -98,26 +113,92 @@ function TontineSummaryCard({
 export default function TontinesPage() {
   const { account } = useAuth();
   const walletAddress = account?.address ?? null;
-  const { tontines, addTontine } = useLocalTontines();
-
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const createdByUser = useMemo(() => {
-    if (!walletAddress) return [];
-    return tontines.filter((tontine) => tontine.createdBy === walletAddress);
-  }, [tontines, walletAddress]);
+  const { tontines: localTontines, addTontine } = useLocalTontines();
+  const { sontineProgram, groupViews, createGroup } = useSontineProgram();
+  const walletMembers = useWalletMemberAccounts(walletAddress);
 
-  const joinedByUser = useMemo(() => {
+  const remoteTontines = useMemo<Tontine[]>(
+    () => groupViews.map((view) => mapGroupViewToTontine(view)),
+    [groupViews]
+  );
+
+  const memberGroupAddresses = useMemo(() => {
+    if (!walletMembers.data) {
+      return new Set<string>();
+    }
+    return new Set(walletMembers.data.map((member: MemberAccountView) => member.groupAddress));
+  }, [walletMembers.data]);
+
+  const remoteCreated = useMemo<Tontine[]>(() => {
     if (!walletAddress) return [];
-    return tontines.filter(
-      (tontine) => tontine.memberAddresses.includes(walletAddress) && tontine.createdBy !== walletAddress
+    return remoteTontines.filter((tontine) => tontine.createdBy === walletAddress);
+  }, [remoteTontines, walletAddress]);
+
+  const remoteJoined = useMemo<Tontine[]>(() => {
+    if (!walletAddress) return [];
+    return remoteTontines.filter(
+      (tontine) =>
+        memberGroupAddresses.has(tontine.contractAddress ?? tontine.id) &&
+        tontine.createdBy !== walletAddress
     );
-  }, [tontines, walletAddress]);
+  }, [remoteTontines, memberGroupAddresses, walletAddress]);
 
-  const handleCreate = (input: CreateTontineInput) => {
-    addTontine({ ...input, creatorAddress: walletAddress });
-    setShowCreateModal(false);
+  const localCreated = useMemo<Tontine[]>(() => {
+    if (!walletAddress) return [];
+    return localTontines.filter((tontine) => tontine.createdBy === walletAddress);
+  }, [localTontines, walletAddress]);
+
+  const localJoined = useMemo<Tontine[]>(() => {
+    if (!walletAddress) return [];
+    return localTontines.filter(
+      (tontine) =>
+        tontine.createdBy !== walletAddress &&
+        tontine.memberAddresses?.includes(walletAddress)
+    );
+  }, [localTontines, walletAddress]);
+
+  const createdByUser = useMemo<Tontine[]>(
+    () => [...remoteCreated, ...localCreated],
+    [remoteCreated, localCreated]
+  );
+
+  const joinedByUser = useMemo<Tontine[]>(
+    () => [...remoteJoined, ...localJoined],
+    [remoteJoined, localJoined]
+  );
+
+  const handleCreate = async (input: CreateTontineInput) => {
+    if (!sontineProgram) {
+      addTontine({ ...input, creatorAddress: walletAddress });
+      setShowCreateModal(false);
+      return;
+    }
+
+    const selectionMethod = toAnchorSelectionMethod(input.selectionMethod ?? 'random');
+    const cycleDuration = toAnchorCycleDuration(
+      input.cycleDuration ?? 'monthly',
+      input.customDurationDays,
+    );
+
+    try {
+      await createGroup.mutateAsync({
+        selectionMethod,
+        maxMembers: input.maxMembers,
+        contributionAmount: input.contributionAmount,
+        cycleDuration,
+        minMembersToStart: input.minMembersToStart,
+        auctionConfig: input.selectionMethod === 'auction' ? input.auctionConfig ?? null : null,
+      });
+
+      setShowCreateModal(false);
+    } catch (error) {
+      throw error;
+    }
   };
+
+  const isCreating = createGroup.isPending;
 
   return (
     <div className="space-y-8">
@@ -130,10 +211,11 @@ export default function TontinesPage() {
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white font-medium shadow-md hover:shadow-lg transition-all"
+            disabled={isCreating}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Plus className="h-4 w-4" />
-            Create group
+            {isCreating ? 'Creating…' : 'Create group'}
           </button>
           <Link
             href="/dashboard/tontines/browse"

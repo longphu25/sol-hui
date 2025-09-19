@@ -7,7 +7,7 @@ import { CreateTontineInput } from '@/hooks/use-local-tontines';
 interface CreateTontineModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: CreateTontineInput) => void;
+  onCreate: (data: CreateTontineInput) => Promise<unknown> | unknown;
 }
 
 interface FormState {
@@ -46,12 +46,14 @@ export function CreateTontineModal({ open, onClose, onCreate }: CreateTontineMod
   const [form, setForm] = React.useState<FormState>(defaultFormState);
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!open) return;
     setForm(defaultFormState);
     setErrors({});
     setIsSubmitting(false);
+    setSubmitError(null);
   }, [open]);
 
   const validate = (): boolean => {
@@ -113,10 +115,11 @@ export function CreateTontineModal({ open, onClose, onCreate }: CreateTontineMod
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!validate()) return;
 
+    setSubmitError(null);
     setIsSubmitting(true);
 
     try {
@@ -138,7 +141,7 @@ export function CreateTontineModal({ open, onClose, onCreate }: CreateTontineMod
         };
       }
 
-      onCreate({
+      await onCreate({
         name: form.name.trim(),
         description: form.description.trim(),
         contributionAmount: Number(form.contributionAmount),
@@ -150,6 +153,10 @@ export function CreateTontineModal({ open, onClose, onCreate }: CreateTontineMod
         customDurationDays,
         auctionConfig,
       });
+    } catch (error) {
+      console.error('Create tontine submission failed', error);
+      const message = error instanceof Error ? error.message : 'Unable to create tontine group';
+      setSubmitError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -480,21 +487,29 @@ export function CreateTontineModal({ open, onClose, onCreate }: CreateTontineMod
             </p>
           </div>
 
-          <div className="flex items-center justify-end space-x-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Creating…' : 'Create tontine'}
-            </button>
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-end space-x-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Creating…' : 'Create tontine'}
+              </button>
+            </div>
+            {submitError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {submitError}
+              </div>
+            )}
           </div>
         </form>
       </div>

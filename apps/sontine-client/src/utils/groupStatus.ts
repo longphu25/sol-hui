@@ -1,10 +1,10 @@
 // Group Status Types based on Rust enum
 export type GroupStatus = 
-  | { forming: {} }
-  | { active: {} }
-  | { paused: {} }
-  | { completed: {} }
-  | { cancelled: {} }
+  | { forming: Record<string, never> }
+  | { active: Record<string, never> }
+  | { paused: Record<string, never> }
+  | { completed: Record<string, never> }
+  | { cancelled: Record<string, never> }
 
 export interface GroupStatusInfo {
   status: 'forming' | 'active' | 'paused' | 'completed' | 'cancelled'

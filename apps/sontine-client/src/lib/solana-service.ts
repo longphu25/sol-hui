@@ -1,4 +1,5 @@
-import { Connection, PublicKey, LAMPORTS_PER_SOL, VersionedTransactionResponse } from '@solana/web3.js';
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+// VersionedTransactionResponse
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
 // USDC Token Address on Devnet

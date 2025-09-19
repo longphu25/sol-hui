@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { fontClasses } from "../lib/fonts";
-import { AppProviders } from "@/components/app-providers";
-import { AuthGuard } from "@/components/auth/auth-guard";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,6 +13,8 @@ export const metadata: Metadata = {
   description: "A modern tontine platform built on Solana blockchain",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,12 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={fontClasses.variable}>
+      <head />
       <body className={`${inter.variable} ${fontClasses.sans} antialiased`}>
-        <AppProviders>
-          <AuthGuard>
         {children}
-          </AuthGuard>
-        </AppProviders>
       </body>
     </html>
   );

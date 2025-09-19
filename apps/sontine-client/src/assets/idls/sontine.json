@@ -1,0 +1,2968 @@
+{
+  "address": "9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1",
+  "metadata": {
+    "name": "sontine",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "cancel_group",
+      "discriminator": [219, 172, 216, 128, 155, 75, 12, 110],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_emergency_refund",
+      "discriminator": [93, 43, 46, 219, 83, 211, 152, 172],
+      "accounts": [
+        {
+          "name": "group"
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 97, 117, 108, 116]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "member_token_account",
+          "writable": true
+        },
+        {
+          "name": "member",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "commit_randomness",
+      "discriminator": [146, 52, 195, 220, 79, 30, 53, 26],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "randomness_account",
+          "docs": ["Switchboard randomness account"],
+          "writable": true
+        },
+        {
+          "name": "queue",
+          "docs": ["Switchboard queue account"]
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "contribute",
+      "discriminator": [82, 33, 68, 131, 32, 0, 205, 95],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 97, 117, 108, 116]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "member",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_group",
+      "discriminator": [79, 60, 158, 134, 61, 199, 56, 248],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 114, 111, 117, 112]
+              },
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "arg",
+                "path": "group_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 97, 117, 108, 116]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "group_id",
+          "type": "u64"
+        },
+        {
+          "name": "selection_method",
+          "type": {
+            "defined": {
+              "name": "SelectionMethod"
+            }
+          }
+        },
+        {
+          "name": "max_members",
+          "type": "u8"
+        },
+        {
+          "name": "contribution_amount",
+          "type": "u64"
+        },
+        {
+          "name": "cycle_duration",
+          "type": {
+            "defined": {
+              "name": "CycleDuration"
+            }
+          }
+        },
+        {
+          "name": "min_members_to_start",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "auction_config",
+          "type": {
+            "option": {
+              "defined": {
+                "name": "AuctionConfig"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "distribute_funds",
+      "discriminator": [124, 82, 187, 45, 224, 209, 31, 156],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 97, 117, 108, 116]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "member_token_account",
+          "writable": true
+        },
+        {
+          "name": "selected_member"
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "distribute_interest",
+      "discriminator": [161, 80, 239, 247, 115, 254, 122, 80],
+      "accounts": [
+        {
+          "name": "group"
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 97, 117, 108, 116]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_token_account",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        },
+        {
+          "name": "remaining_members",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "emergency_pause",
+      "discriminator": [21, 143, 27, 142, 200, 181, 210, 255],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "emergency_resume",
+      "discriminator": [0, 243, 48, 185, 6, 73, 190, 83],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize_round",
+      "discriminator": [239, 160, 254, 11, 254, 144, 53, 148],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "get_auction_statistics",
+      "discriminator": [135, 85, 235, 166, 72, 205, 128, 95],
+      "accounts": [
+        {
+          "name": "auction_round"
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "AuctionStatistics"
+        }
+      }
+    },
+    {
+      "name": "get_group_statistics",
+      "discriminator": [97, 215, 137, 171, 153, 47, 171, 76],
+      "accounts": [
+        {
+          "name": "group"
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "GroupStatistics"
+        }
+      }
+    },
+    {
+      "name": "get_member_statistics",
+      "discriminator": [65, 132, 61, 98, 78, 20, 135, 206],
+      "accounts": [
+        {
+          "name": "member_account"
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "MemberStatistics"
+        }
+      }
+    },
+    {
+      "name": "get_round_statistics",
+      "discriminator": [81, 92, 171, 144, 144, 88, 192, 248],
+      "accounts": [
+        {
+          "name": "round"
+        }
+      ],
+      "args": [],
+      "returns": {
+        "defined": {
+          "name": "RoundStatistics"
+        }
+      }
+    },
+    {
+      "name": "initialize",
+      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "initiate_emergency_refund",
+      "discriminator": [239, 254, 190, 249, 140, 67, 187, 37],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "join_group",
+      "discriminator": [121, 56, 199, 19, 250, 70, 44, 184],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "member_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 101, 109, 98, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "account",
+                "path": "member"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "leave_group",
+      "discriminator": [10, 4, 125, 28, 46, 23, 233, 29],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "member",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "place_bid",
+      "discriminator": [238, 77, 148, 91, 200, 151, 92, 146],
+      "accounts": [
+        {
+          "name": "group"
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "auction_round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 117, 99, 116, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        },
+        {
+          "name": "bid_amount",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "process_partial_refund",
+      "discriminator": [91, 2, 45, 239, 179, 132, 197, 213],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 97, 117, 108, 116]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "member_token_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "reset_members_for_new_round",
+      "discriminator": [144, 99, 246, 42, 240, 170, 182, 215],
+      "accounts": [
+        {
+          "name": "group"
+        },
+        {
+          "name": "member_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "select_winner",
+      "discriminator": [119, 66, 44, 236, 79, 158, 82, 51],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "auction_round",
+          "docs": ["Optional auction round account for auction method"],
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 117, 99, 116, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        },
+        {
+          "name": "eligible_members",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "settle_randomness",
+      "discriminator": [209, 111, 84, 239, 14, 4, 26, 251],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "randomness_account",
+          "docs": ["Switchboard randomness account"]
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        },
+        {
+          "name": "eligible_members",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "start_auction",
+      "discriminator": [255, 2, 149, 136, 148, 125, 65, 195],
+      "accounts": [
+        {
+          "name": "group"
+        },
+        {
+          "name": "round",
+          "writable": true
+        },
+        {
+          "name": "auction_round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 117, 99, 116, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "start_group",
+      "discriminator": [247, 125, 134, 7, 156, 15, 173, 1],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "first_round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "const",
+                "value": [0]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "start_round",
+      "discriminator": [144, 144, 43, 7, 193, 42, 217, 215],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "round",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [114, 111, 117, 110, 100]
+              },
+              {
+                "kind": "account",
+                "path": "group"
+              },
+              {
+                "kind": "arg",
+                "path": "round_number"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "round_number",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "update_group_config",
+      "discriminator": [237, 22, 68, 139, 99, 160, 215, 91],
+      "accounts": [
+        {
+          "name": "group",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_min_members_to_start",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "new_auction_config",
+          "type": {
+            "option": {
+              "defined": {
+                "name": "AuctionConfig"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AuctionRound",
+      "discriminator": [193, 35, 83, 13, 200, 67, 45, 96]
+    },
+    {
+      "name": "Group",
+      "discriminator": [209, 249, 208, 63, 182, 89, 186, 254]
+    },
+    {
+      "name": "Member",
+      "discriminator": [54, 19, 162, 21, 29, 166, 17, 198]
+    },
+    {
+      "name": "Round",
+      "discriminator": [87, 127, 165, 51, 73, 78, 116, 174]
+    }
+  ],
+  "events": [
+    {
+      "name": "AuctionStarted",
+      "discriminator": [126, 97, 193, 56, 72, 162, 162, 64]
+    },
+    {
+      "name": "BidPlaced",
+      "discriminator": [135, 53, 176, 83, 193, 69, 108, 61]
+    },
+    {
+      "name": "ContributionMade",
+      "discriminator": [81, 218, 72, 109, 93, 96, 131, 199]
+    },
+    {
+      "name": "EmergencyRefundClaimed",
+      "discriminator": [104, 236, 213, 53, 33, 123, 169, 163]
+    },
+    {
+      "name": "EmergencyRefundInitiated",
+      "discriminator": [181, 66, 90, 57, 124, 48, 249, 253]
+    },
+    {
+      "name": "FundsDistributed",
+      "discriminator": [246, 28, 47, 10, 202, 53, 3, 232]
+    },
+    {
+      "name": "GroupCancelled",
+      "discriminator": [59, 49, 243, 198, 10, 174, 169, 2]
+    },
+    {
+      "name": "GroupConfigUpdated",
+      "discriminator": [147, 232, 195, 160, 131, 40, 138, 52]
+    },
+    {
+      "name": "GroupCreated",
+      "discriminator": [132, 94, 184, 198, 77, 165, 13, 26]
+    },
+    {
+      "name": "GroupPaused",
+      "discriminator": [201, 42, 147, 163, 162, 140, 175, 191]
+    },
+    {
+      "name": "GroupResumed",
+      "discriminator": [153, 78, 122, 141, 40, 93, 191, 227]
+    },
+    {
+      "name": "GroupStarted",
+      "discriminator": [22, 160, 223, 146, 57, 205, 202, 221]
+    },
+    {
+      "name": "InterestDistributed",
+      "discriminator": [235, 153, 18, 137, 191, 105, 51, 54]
+    },
+    {
+      "name": "MemberJoined",
+      "discriminator": [156, 199, 149, 88, 193, 203, 191, 210]
+    },
+    {
+      "name": "MemberLeft",
+      "discriminator": [48, 83, 72, 92, 111, 227, 133, 142]
+    },
+    {
+      "name": "PartialRefundProcessed",
+      "discriminator": [44, 255, 244, 126, 87, 212, 119, 147]
+    },
+    {
+      "name": "RandomWinnerSelected",
+      "discriminator": [44, 75, 107, 162, 14, 231, 14, 158]
+    },
+    {
+      "name": "RandomnessCommitted",
+      "discriminator": [125, 150, 46, 71, 102, 251, 253, 108]
+    },
+    {
+      "name": "RoundFinalized",
+      "discriminator": [43, 187, 17, 193, 36, 241, 48, 82]
+    },
+    {
+      "name": "RoundStarted",
+      "discriminator": [180, 209, 2, 244, 238, 48, 170, 120]
+    },
+    {
+      "name": "WinnerSelected",
+      "discriminator": [245, 110, 152, 173, 193, 48, 133, 5]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized access to group"
+    },
+    {
+      "code": 6001,
+      "name": "GroupFull",
+      "msg": "Group is full"
+    },
+    {
+      "code": 6002,
+      "name": "CannotStartGroup",
+      "msg": "Group cannot be started"
+    },
+    {
+      "code": 6003,
+      "name": "GroupNotActive",
+      "msg": "Group is not active"
+    },
+    {
+      "code": 6004,
+      "name": "GroupPaused",
+      "msg": "Group is paused"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidSelectionMethod",
+      "msg": "Invalid selection method"
+    },
+    {
+      "code": 6006,
+      "name": "GroupAlreadyStarted",
+      "msg": "Group already started"
+    },
+    {
+      "code": 6007,
+      "name": "GroupNotFound",
+      "msg": "Group not found"
+    },
+    {
+      "code": 6008,
+      "name": "MemberNotActive",
+      "msg": "Member not active"
+    },
+    {
+      "code": 6009,
+      "name": "MemberAlreadyExists",
+      "msg": "Member already exists"
+    },
+    {
+      "code": 6010,
+      "name": "MemberNotFound",
+      "msg": "Member not found"
+    },
+    {
+      "code": 6011,
+      "name": "MemberAlreadyReceived",
+      "msg": "Member already received payout"
+    },
+    {
+      "code": 6012,
+      "name": "AlreadyContributed",
+      "msg": "Member already contributed this round"
+    },
+    {
+      "code": 6013,
+      "name": "NoEligibleMembers",
+      "msg": "No eligible members"
+    },
+    {
+      "code": 6014,
+      "name": "RoundNotAcceptingContributions",
+      "msg": "Round not accepting contributions"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidRoundStatus",
+      "msg": "Invalid round status"
+    },
+    {
+      "code": 6016,
+      "name": "RoundNotCompleted",
+      "msg": "Round not completed"
+    },
+    {
+      "code": 6017,
+      "name": "NotReadyForSelection",
+      "msg": "Not ready for selection"
+    },
+    {
+      "code": 6018,
+      "name": "NoMemberSelected",
+      "msg": "No member selected"
+    },
+    {
+      "code": 6019,
+      "name": "RoundAlreadyExists",
+      "msg": "Round already exists"
+    },
+    {
+      "code": 6020,
+      "name": "AuctionNotActive",
+      "msg": "Auction not active"
+    },
+    {
+      "code": 6021,
+      "name": "AuctionStillActive",
+      "msg": "Auction still active"
+    },
+    {
+      "code": 6022,
+      "name": "AuctionFinalized",
+      "msg": "Auction finalized"
+    },
+    {
+      "code": 6023,
+      "name": "BidTooLow",
+      "msg": "Bid too low"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidBidAmount",
+      "msg": "Invalid bid amount"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidContributionAmount",
+      "msg": "Invalid contribution amount"
+    },
+    {
+      "code": 6026,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6027,
+      "name": "InvalidAmount",
+      "msg": "Invalid amount"
+    },
+    {
+      "code": 6028,
+      "name": "TooEarly",
+      "msg": "Too early"
+    },
+    {
+      "code": 6029,
+      "name": "TooLate",
+      "msg": "Too late"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidTiming",
+      "msg": "Invalid timing"
+    },
+    {
+      "code": 6031,
+      "name": "InvalidConfiguration",
+      "msg": "Invalid configuration"
+    },
+    {
+      "code": 6032,
+      "name": "InvalidMaxMembers",
+      "msg": "Invalid max members"
+    },
+    {
+      "code": 6033,
+      "name": "InvalidCycleDuration",
+      "msg": "Invalid cycle duration"
+    },
+    {
+      "code": 6034,
+      "name": "MathOverflow",
+      "msg": "Math overflow"
+    },
+    {
+      "code": 6035,
+      "name": "DivisionByZero",
+      "msg": "Division by zero"
+    },
+    {
+      "code": 6036,
+      "name": "InvalidState",
+      "msg": "Invalid state"
+    },
+    {
+      "code": 6037,
+      "name": "OperationNotAllowed",
+      "msg": "Operation not allowed"
+    },
+    {
+      "code": 6038,
+      "name": "AccountMismatch",
+      "msg": "Account mismatch"
+    },
+    {
+      "code": 6039,
+      "name": "InvalidAccount",
+      "msg": "Invalid account"
+    },
+    {
+      "code": 6040,
+      "name": "RandomnessAlreadyRequested",
+      "msg": "Randomness already requested"
+    },
+    {
+      "code": 6041,
+      "name": "RandomnessNotCommitted",
+      "msg": "Randomness not committed"
+    },
+    {
+      "code": 6042,
+      "name": "RandomnessNotRevealed",
+      "msg": "Randomness not revealed"
+    },
+    {
+      "code": 6043,
+      "name": "InvalidRandomnessAccount",
+      "msg": "Invalid randomness account"
+    },
+    {
+      "code": 6044,
+      "name": "InvalidRandomnessSlot",
+      "msg": "Invalid randomness slot"
+    },
+    {
+      "code": 6045,
+      "name": "RandomnessAlreadyRevealed",
+      "msg": "Randomness already revealed"
+    }
+  ],
+  "types": [
+    {
+      "name": "AuctionBid",
+      "docs": ["Auction bid information"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "docs": ["Member who placed the bid"],
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "docs": ["Bid amount (interest rate in basis points)"],
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "docs": ["Timestamp when bid was placed"],
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionConfig",
+      "docs": ["Configuration for auction-based selection"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "auction_duration",
+            "docs": ["Duration of auction phase in seconds"],
+            "type": "u64"
+          },
+          {
+            "name": "min_bid_increment",
+            "docs": ["Minimum bid increment in basis points"],
+            "type": "u16"
+          },
+          {
+            "name": "max_interest_rate",
+            "docs": ["Maximum interest rate allowed (basis points)"],
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionRound",
+      "docs": ["Account to track auction state for a specific round"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "docs": ["The group this auction belongs to"],
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "docs": ["Round number"],
+            "type": "u8"
+          },
+          {
+            "name": "start_time",
+            "docs": ["Auction start time"],
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "docs": ["Auction end time"],
+            "type": "i64"
+          },
+          {
+            "name": "highest_bid",
+            "docs": ["Current highest bid"],
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "AuctionBid"
+                }
+              }
+            }
+          },
+          {
+            "name": "bids",
+            "docs": ["All bids placed (for transparency)"],
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "AuctionBid"
+                }
+              }
+            }
+          },
+          {
+            "name": "finalized",
+            "docs": ["Whether auction is finalized"],
+            "type": "bool"
+          },
+          {
+            "name": "reserved",
+            "docs": ["Reserved space"],
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionStarted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "auction_round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          },
+          {
+            "name": "duration",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionStatistics",
+      "docs": ["Auction statistics"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "u8"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          },
+          {
+            "name": "highest_bid",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "AuctionBid"
+                }
+              }
+            }
+          },
+          {
+            "name": "total_bids",
+            "type": "u8"
+          },
+          {
+            "name": "finalized",
+            "type": "bool"
+          },
+          {
+            "name": "is_active",
+            "type": "bool"
+          },
+          {
+            "name": "remaining_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BidPlaced",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "auction_round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "bid_amount",
+            "type": "u16"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContributionMade",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "total_collected",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CycleDuration",
+      "docs": ["Cycle duration for rounds"],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Weekly"
+          },
+          {
+            "name": "Monthly"
+          },
+          {
+            "name": "Custom",
+            "fields": ["u64"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "EmergencyRefundClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund_amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EmergencyRefundInitiated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundsDistributed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "interest_amount",
+            "type": "u64"
+          },
+          {
+            "name": "group_completed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Group",
+      "docs": [
+        "Main group account that holds all group configuration and state"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "docs": ["Group admin who can manage the group"],
+            "type": "pubkey"
+          },
+          {
+            "name": "group_id",
+            "docs": ["Unique identifier for the group"],
+            "type": "u64"
+          },
+          {
+            "name": "selection_method",
+            "docs": ["Selection method for this group"],
+            "type": {
+              "defined": {
+                "name": "SelectionMethod"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "docs": ["Current status of the group"],
+            "type": {
+              "defined": {
+                "name": "GroupStatus"
+              }
+            }
+          },
+          {
+            "name": "max_members",
+            "docs": ["Maximum number of members allowed"],
+            "type": "u8"
+          },
+          {
+            "name": "current_members",
+            "docs": ["Current number of members"],
+            "type": "u8"
+          },
+          {
+            "name": "contribution_amount",
+            "docs": [
+              "Amount each member must contribute per round (in lamports)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "cycle_duration",
+            "docs": ["Duration of each round"],
+            "type": {
+              "defined": {
+                "name": "CycleDuration"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "docs": ["Timestamp when the group was created"],
+            "type": "i64"
+          },
+          {
+            "name": "started_at",
+            "docs": ["Timestamp when the group started (first round)"],
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "current_round",
+            "docs": ["Current round number (0-indexed)"],
+            "type": "u8"
+          },
+          {
+            "name": "total_rounds",
+            "docs": ["Total number of rounds (equals max_members)"],
+            "type": "u8"
+          },
+          {
+            "name": "vault",
+            "docs": ["Vault account that holds the group's funds"],
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_bump",
+            "docs": ["Vault bump for PDA derivation"],
+            "type": "u8"
+          },
+          {
+            "name": "fixed_order",
+            "docs": [
+              "For fixed order selection: list of member pubkeys in order"
+            ],
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "is_paused",
+            "docs": ["Emergency pause flag"],
+            "type": "bool"
+          },
+          {
+            "name": "min_members_to_start",
+            "docs": [
+              "Minimum members required to start (default: max_members)"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "auction_config",
+            "docs": ["Configuration for auction method"],
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "AuctionConfig"
+                }
+              }
+            }
+          },
+          {
+            "name": "total_collected",
+            "docs": ["Total amount collected so far"],
+            "type": "u64"
+          },
+          {
+            "name": "total_distributed",
+            "docs": ["Total amount distributed so far"],
+            "type": "u64"
+          },
+          {
+            "name": "reserved",
+            "docs": ["Reserved space for future upgrades"],
+            "type": {
+              "array": ["u8", 64]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupConfigUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "group_id",
+            "type": "u64"
+          },
+          {
+            "name": "selection_method",
+            "type": {
+              "defined": {
+                "name": "SelectionMethod"
+              }
+            }
+          },
+          {
+            "name": "max_members",
+            "type": "u8"
+          },
+          {
+            "name": "contribution_amount",
+            "type": "u64"
+          },
+          {
+            "name": "cycle_duration",
+            "type": {
+              "defined": {
+                "name": "CycleDuration"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupPaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupResumed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupStarted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "member_count",
+            "type": "u8"
+          },
+          {
+            "name": "first_round",
+            "type": "pubkey"
+          },
+          {
+            "name": "target_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupStatistics",
+      "docs": ["Comprehensive group statistics"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group_id",
+            "type": "u64"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "selection_method",
+            "type": {
+              "defined": {
+                "name": "SelectionMethod"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "GroupStatus"
+              }
+            }
+          },
+          {
+            "name": "max_members",
+            "type": "u8"
+          },
+          {
+            "name": "current_members",
+            "type": "u8"
+          },
+          {
+            "name": "min_members_to_start",
+            "type": "u8"
+          },
+          {
+            "name": "contribution_amount",
+            "type": "u64"
+          },
+          {
+            "name": "cycle_duration",
+            "type": {
+              "defined": {
+                "name": "CycleDuration"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "started_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "current_round",
+            "type": "u8"
+          },
+          {
+            "name": "total_rounds",
+            "type": "u8"
+          },
+          {
+            "name": "total_collected",
+            "type": "u64"
+          },
+          {
+            "name": "total_distributed",
+            "type": "u64"
+          },
+          {
+            "name": "is_paused",
+            "type": "bool"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "fixed_order",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "auction_config",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "AuctionConfig"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "GroupStatus",
+      "docs": ["Group status"],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Forming"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Paused"
+          },
+          {
+            "name": "Completed"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InterestDistributed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "interest_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Member",
+      "docs": [
+        "Member account that tracks individual member state within a group"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "docs": ["The member's wallet address"],
+            "type": "pubkey"
+          },
+          {
+            "name": "group",
+            "docs": ["The group this member belongs to"],
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "docs": ["Member's status in the group"],
+            "type": {
+              "defined": {
+                "name": "MemberStatus"
+              }
+            }
+          },
+          {
+            "name": "joined_at",
+            "docs": ["When the member joined the group"],
+            "type": "i64"
+          },
+          {
+            "name": "received_round",
+            "docs": ["Round number when member received payout (if any)"],
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "amount_received",
+            "docs": ["Amount received by this member"],
+            "type": "u64"
+          },
+          {
+            "name": "total_contributed",
+            "docs": ["Total amount contributed by this member"],
+            "type": "u64"
+          },
+          {
+            "name": "rounds_contributed",
+            "docs": ["Number of rounds this member has contributed to"],
+            "type": "u8"
+          },
+          {
+            "name": "current_bid",
+            "docs": [
+              "For auction method: member's current bid (interest rate in basis points)"
+            ],
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "last_bid_time",
+            "docs": ["For auction method: timestamp of last bid"],
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "fixed_order_position",
+            "docs": ["Member's position in fixed order (if applicable)"],
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "contributed_current_round",
+            "docs": ["Whether member has contributed to current round"],
+            "type": "bool"
+          },
+          {
+            "name": "reserved",
+            "docs": ["Reserved space for future upgrades"],
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MemberJoined",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "member_count",
+            "type": "u8"
+          },
+          {
+            "name": "fixed_order_position",
+            "type": {
+              "option": "u8"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "MemberLeft",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "remaining_members",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MemberStatistics",
+      "docs": ["Member statistics"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "MemberStatus"
+              }
+            }
+          },
+          {
+            "name": "joined_at",
+            "type": "i64"
+          },
+          {
+            "name": "received_round",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "amount_received",
+            "type": "u64"
+          },
+          {
+            "name": "total_contributed",
+            "type": "u64"
+          },
+          {
+            "name": "rounds_contributed",
+            "type": "u8"
+          },
+          {
+            "name": "current_bid",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "last_bid_time",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "fixed_order_position",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "contributed_current_round",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MemberStatus",
+      "docs": ["Member status within a group"],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Received"
+          },
+          {
+            "name": "Left"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PartialRefundProcessed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund_amount",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RandomWinnerSelected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "selected_member",
+            "type": "pubkey"
+          },
+          {
+            "name": "selection_method",
+            "type": {
+              "defined": {
+                "name": "SelectionMethod"
+              }
+            }
+          },
+          {
+            "name": "interest_rate",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "random_value",
+            "type": {
+              "option": {
+                "array": ["u8", 32]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RandomnessCommitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "randomness_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "committed_slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RandomnessStatus",
+      "docs": ["Status of Switchboard randomness request"],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "NotRequested"
+          },
+          {
+            "name": "Committed"
+          },
+          {
+            "name": "Revealed"
+          },
+          {
+            "name": "Failed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Round",
+      "docs": ["Round account that tracks the state of each funding round"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "docs": ["The group this round belongs to"],
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "docs": ["Round number (0-indexed)"],
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": ["Current status of the round"],
+            "type": {
+              "defined": {
+                "name": "RoundStatus"
+              }
+            }
+          },
+          {
+            "name": "start_time",
+            "docs": ["When the round started"],
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "docs": ["When the round should end"],
+            "type": "i64"
+          },
+          {
+            "name": "target_amount",
+            "docs": ["Target amount to collect this round"],
+            "type": "u64"
+          },
+          {
+            "name": "collected_amount",
+            "docs": ["Amount collected so far"],
+            "type": "u64"
+          },
+          {
+            "name": "contributors_count",
+            "docs": ["Number of members who have contributed"],
+            "type": "u8"
+          },
+          {
+            "name": "expected_contributors",
+            "docs": ["Expected number of contributors"],
+            "type": "u8"
+          },
+          {
+            "name": "selected_member",
+            "docs": ["Member selected to receive funds this round"],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "distributed_amount",
+            "docs": ["Amount distributed to selected member"],
+            "type": "u64"
+          },
+          {
+            "name": "interest_rate",
+            "docs": [
+              "Interest rate for this round (basis points) - for auction method"
+            ],
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "interest_amount",
+            "docs": ["Interest amount to be distributed to other members"],
+            "type": "u64"
+          },
+          {
+            "name": "random_seed",
+            "docs": ["Random seed used for selection (for random method)"],
+            "type": {
+              "option": {
+                "array": ["u8", 32]
+              }
+            }
+          },
+          {
+            "name": "randomness_account",
+            "docs": ["Switchboard randomness account for VRF"],
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "randomness_status",
+            "docs": ["Randomness status for tracking VRF lifecycle"],
+            "type": {
+              "defined": {
+                "name": "RandomnessStatus"
+              }
+            }
+          },
+          {
+            "name": "committed_slot",
+            "docs": ["Slot when randomness was committed"],
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "contributors",
+            "docs": ["List of members who contributed this round"],
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "finalized",
+            "docs": ["Whether round is finalized"],
+            "type": "bool"
+          },
+          {
+            "name": "reserved",
+            "docs": ["Reserved space for future upgrades"],
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoundFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "group_completed",
+            "type": "bool"
+          },
+          {
+            "name": "total_collected",
+            "type": "u64"
+          },
+          {
+            "name": "total_distributed",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoundStarted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "target_amount",
+            "type": "u64"
+          },
+          {
+            "name": "expected_contributors",
+            "type": "u8"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoundStatistics",
+      "docs": ["Round statistics with additional computed fields"],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "RoundStatus"
+              }
+            }
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          },
+          {
+            "name": "target_amount",
+            "type": "u64"
+          },
+          {
+            "name": "collected_amount",
+            "type": "u64"
+          },
+          {
+            "name": "contributors_count",
+            "type": "u8"
+          },
+          {
+            "name": "expected_contributors",
+            "type": "u8"
+          },
+          {
+            "name": "selected_member",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "distributed_amount",
+            "type": "u64"
+          },
+          {
+            "name": "interest_rate",
+            "type": {
+              "option": "u16"
+            }
+          },
+          {
+            "name": "interest_amount",
+            "type": "u64"
+          },
+          {
+            "name": "random_seed",
+            "type": {
+              "option": {
+                "array": ["u8", 32]
+              }
+            }
+          },
+          {
+            "name": "contributors",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "finalized",
+            "type": "bool"
+          },
+          {
+            "name": "remaining_time",
+            "type": "i64"
+          },
+          {
+            "name": "completion_percentage",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoundStatus",
+      "docs": ["Round status"],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Contributing"
+          },
+          {
+            "name": "Selecting"
+          },
+          {
+            "name": "Completed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SelectionMethod",
+      "docs": [
+        "Selection method for determining who receives funds each round"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Auction"
+          },
+          {
+            "name": "Random"
+          },
+          {
+            "name": "FixedOrder"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WinnerSelected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "group",
+            "type": "pubkey"
+          },
+          {
+            "name": "round",
+            "type": "pubkey"
+          },
+          {
+            "name": "round_number",
+            "type": "u8"
+          },
+          {
+            "name": "selected_member",
+            "type": "pubkey"
+          },
+          {
+            "name": "selection_method",
+            "type": {
+              "defined": {
+                "name": "SelectionMethod"
+              }
+            }
+          },
+          {
+            "name": "interest_rate",
+            "type": {
+              "option": "u16"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

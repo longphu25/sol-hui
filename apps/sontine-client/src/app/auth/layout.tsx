@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppProviders } from '@/components/app-providers';
 
 export const metadata: Metadata = {
   title: 'Sign In | Sontine',
@@ -11,10 +12,12 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#00B49F] to-[#00A08A] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {children}
+    <AppProviders>
+      <div className="min-h-screen bg-gradient-to-br from-[#00B49F] to-[#00A08A] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {children}
+        </div>
       </div>
-    </div>
+    </AppProviders>
   );
 }

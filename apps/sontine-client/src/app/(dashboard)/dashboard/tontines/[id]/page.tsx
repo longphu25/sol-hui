@@ -12,9 +12,16 @@ import {
   Link as LinkIcon,
   Activity as ActivityIcon,
 } from 'lucide-react';
+import { PublicKey } from '@solana/web3.js';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useLocalTontines } from '@/hooks/use-local-tontines';
-import { getMockTontineById } from '@/utils/mock-tontines';
+import {
+  mapGroupAccount,
+  useGetGroup,
+  useGroupMembers,
+  useSontineProgram,
+  type GroupAccountView,
+} from '@/hooks/use-sontine-porgram';
 import { ellipsify } from '@/utils/ellipsify';
 import type { Tontine, TontineStatus } from '@/types/tontine';
 
@@ -78,11 +85,70 @@ const statusMeta: Record<TontineStatus | 'pending', StatusMeta> = {
   },
 };
 
+function groupViewToTontine(view: GroupAccountView): Tontine {
+  const contribution = view.contributionAmount.tokens;
+  const totalAmount = contribution * view.totalRounds;
+  const createdAtSeconds = Number.isFinite(view.createdAt) ? view.createdAt : 0;
+
+  return {
+    id: view.address,
+    name: `Group ${view.groupId}`,
+    description: `Admin ${ellipsify(view.admin, 6)}`,
+    totalAmount,
+    contributionAmount: contribution,
+    members: view.currentMembers,
+    currentRound: view.account.currentRound,
+    totalRounds: view.totalRounds,
+    nextContribution: null,
+    status: mapStatusToTontineStatus(view.status),
+    myTurn: false,
+    biddingOpen: view.selectionMethod === 'auction',
+    gid: view.address,
+    maxMembers: view.maxMembers,
+    minMembersToStart: view.minMembersToStart,
+    memberAddresses: undefined,
+    source: 'remote',
+    createdAt: createdAtSeconds
+      ? new Date(createdAtSeconds * 1000).toISOString()
+      : new Date().toISOString(),
+    createdBy: view.admin,
+    contractAddress: view.address,
+    settings: {
+      selectionMethod: view.selectionMethod,
+      cycleDuration: view.cycleDuration,
+      customDurationDays: view.customDurationDays ? Math.round(view.customDurationDays) : null,
+      auctionConfig: null,
+    },
+  };
+}
+
+function mapStatusToTontineStatus(status: GroupAccountView['status']): Tontine['status'] {
+  switch (status) {
+    case 'forming':
+      return 'forming';
+    case 'active':
+      return 'active';
+    case 'paused':
+      return 'paused';
+    case 'completed':
+      return 'completed';
+    case 'cancelled':
+      return 'cancelled';
+    default:
+      return 'pending';
+  }
+}
+
 function getStatusInfo(status: TontineStatus | 'pending'): StatusMeta {
   return statusMeta[status] ?? statusMeta.pending;
 }
 
-function buildActivityFeed(tontine: Tontine, isLocal: boolean, memberCount: number) {
+function buildActivityFeed(
+  tontine: Tontine,
+  isLocal: boolean,
+  memberCount: number,
+  groupView?: GroupAccountView | null,
+) {
   if (isLocal) {
     const createdAt = tontine.createdAt ? new Date(tontine.createdAt).toLocaleString() : 'Recently';
     return [
@@ -101,14 +167,18 @@ function buildActivityFeed(tontine: Tontine, isLocal: boolean, memberCount: numb
 
   return [
     {
-      title: 'Contract deployed',
-      subtitle: 'Deployed on Solana devnet',
-      timestamp: '2024-06-01',
+      title: 'Group created on-chain',
+      subtitle: groupView
+        ? `Admin ${ellipsify(groupView.admin, 6)}`
+        : `Managed by ${ellipsify(tontine.createdBy ?? tontine.id, 6)}`,
+      timestamp: groupView?.createdAt
+        ? new Date(groupView.createdAt * 1000).toLocaleString()
+        : 'Recent',
     },
     {
-      title: 'Latest round update',
-      subtitle: `Round ${tontine.currentRound} of ${tontine.totalRounds} in progress`,
-      timestamp: '2024-06-15',
+      title: 'Member roster',
+      subtitle: `${memberCount} on-chain participant${memberCount === 1 ? '' : 's'}`,
+      timestamp: 'Live data',
     },
   ];
 }
@@ -121,9 +191,41 @@ export default function TontineDetailPage() {
   const walletAddress = account?.address ?? null;
 
   const { getTontineById, joinTontine } = useLocalTontines();
+  const { joinGroup } = useSontineProgram();
+
+  const groupQuery = useGetGroup(groupAddress);
+  const groupMembersQuery = useGroupMembers(groupAddress);
+
   const localTontine = getTontineById(groupAddress);
-  const remoteTontine = localTontine ? null : getMockTontineById(groupAddress);
+
+  const remoteGroupView = React.useMemo(() => {
+    if (!groupQuery.data) {
+      return null;
+    }
+
+    try {
+      return mapGroupAccount(new PublicKey(groupAddress), groupQuery.data);
+    } catch (error) {
+      console.error('Failed to map on-chain group', error);
+      return null;
+    }
+  }, [groupQuery.data, groupAddress]);
+
+  const remoteTontine = React.useMemo(
+    () => (remoteGroupView ? groupViewToTontine(remoteGroupView) : null),
+    [remoteGroupView]
+  );
+
+  const memberAccounts = React.useMemo(
+    () => groupMembersQuery.data ?? [],
+    [groupMembersQuery.data],
+  )
+
   const tontine = localTontine ?? remoteTontine;
+  const remoteMemberAddresses = React.useMemo(
+    () => memberAccounts.map((member) => member.memberAddress),
+    [memberAccounts]
+  );
 
   const [feedback, setFeedback] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -185,34 +287,66 @@ export default function TontineDetailPage() {
 
   const memberList = isLocal
     ? localTontine?.memberAddresses ?? []
-    : Array.from({ length: tontine.members }, (_, index) => `Member ${index + 1}`);
+    : remoteMemberAddresses;
 
-  const isMember = isLocal && walletAddress ? memberList.includes(walletAddress) : false;
-  const isFull = isLocal && localTontine ? memberList.length >= localTontine.maxMembers : false;
+  const isMember = walletAddress ? memberList.includes(walletAddress) : false;
+  const maxCapacity = tontine.maxMembers ?? tontine.totalRounds ?? memberList.length;
+  const isFull = isLocal
+    ? localTontine
+      ? memberList.length >= localTontine.maxMembers
+      : false
+    : memberList.length >= maxCapacity;
 
-  const activityFeed = buildActivityFeed(tontine, isLocal, memberList.length);
+  const activityFeed = buildActivityFeed(
+    tontine,
+    isLocal,
+    memberList.length,
+    remoteGroupView ?? undefined,
+  );
 
-  const handleJoin = () => {
-    if (!localTontine) return;
-    const result = joinTontine(localTontine.id, walletAddress ?? undefined);
+  const isJoining = joinGroup.isPending;
 
-    if (result.success) {
-      setFeedback({ type: 'success', text: 'You have joined this tontine.' });
+  const handleJoin = async () => {
+    if (localTontine) {
+      const result = joinTontine(localTontine.id, walletAddress ?? undefined);
+
+      if (result.success) {
+        setFeedback({ type: 'success', text: 'You have joined this tontine.' });
+        return;
+      }
+
+      switch (result.reason) {
+        case 'WALLET_REQUIRED':
+          setFeedback({ type: 'error', text: 'Connect your wallet to join this tontine.' });
+          break;
+        case 'ALREADY_JOINED':
+          setFeedback({ type: 'error', text: 'You are already a member of this tontine.' });
+          break;
+        case 'GROUP_FULL':
+          setFeedback({ type: 'error', text: 'This tontine is already full.' });
+          break;
+        default:
+          setFeedback({ type: 'error', text: 'Unable to join the tontine right now.' });
+      }
       return;
     }
 
-    switch (result.reason) {
-      case 'WALLET_REQUIRED':
-        setFeedback({ type: 'error', text: 'Connect your wallet to join this tontine.' });
-        break;
-      case 'ALREADY_JOINED':
-        setFeedback({ type: 'error', text: 'You are already a member of this tontine.' });
-        break;
-      case 'GROUP_FULL':
-        setFeedback({ type: 'error', text: 'This tontine is already full.' });
-        break;
-      default:
-        setFeedback({ type: 'error', text: 'Unable to join the tontine right now.' });
+    if (!remoteTontine) {
+      return;
+    }
+
+    if (!walletAddress) {
+      setFeedback({ type: 'error', text: 'Connect your wallet to join this tontine.' });
+      return;
+    }
+
+    try {
+      await joinGroup.mutateAsync(groupAddress);
+      setFeedback({ type: 'success', text: 'You have joined this tontine.' });
+    } catch (error) {
+      console.error('Join tontine failed', error);
+      const message = error instanceof Error ? error.message : 'Failed to join this tontine.';
+      setFeedback({ type: 'error', text: message });
     }
   };
 
@@ -281,33 +415,30 @@ export default function TontineDetailPage() {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
         <h2 className="text-xl font-semibold text-gray-900">Membership</h2>
-        {isLocal ? (
-          isMember ? (
-            <div className="flex items-center gap-2 text-[#00B49F] font-medium">
-              <CheckCircle2 className="h-5 w-5" />
-              You are a member of this tontine
-            </div>
-          ) : (
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <p className="text-gray-600">{statusInfo.description}</p>
-              <button
-                type="button"
-                onClick={handleJoin}
-                disabled={!statusInfo.canJoin || isFull}
-                className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  !statusInfo.canJoin || isFull
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white hover:shadow-md'
-                }`}
-              >
-                {isFull ? 'Group full' : 'Join tontine'}
-              </button>
-            </div>
-          )
-        ) : (
-          <div className="text-gray-600 text-sm">
-            On-chain tontines can be joined from your connected wallet once the integration is available.
+        {isMember ? (
+          <div className="flex items-center gap-2 text-[#00B49F] font-medium">
+            <CheckCircle2 className="h-5 w-5" />
+            You are a member of this tontine
           </div>
+        ) : (
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <p className="text-gray-600">{statusInfo.description}</p>
+            <button
+              type="button"
+              onClick={() => void handleJoin()}
+              disabled={!statusInfo.canJoin || isFull || isJoining || (!walletAddress && !isLocal)}
+              className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                !statusInfo.canJoin || isFull || isJoining || (!walletAddress && !isLocal)
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-[#00B49F] to-[#00A08A] text-white hover:shadow-md'
+              }`}
+            >
+              {isFull ? 'Group full' : isJoining ? 'Joining…' : 'Join tontine'}
+            </button>
+          </div>
+        )}
+        {!walletAddress && !isMember && (
+          <p className="text-xs text-gray-500">Connect your wallet to join this tontine.</p>
         )}
       </div>
 
@@ -364,7 +495,7 @@ export default function TontineDetailPage() {
               memberList.map((member, index) => (
                 <li key={`${member}-${index}`} className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-[#00B49F]" />
-                  <span>{isLocal ? ellipsify(member, 6) : member}</span>
+                  <span>{ellipsify(member, 6)}</span>
                 </li>
               ))
             )}

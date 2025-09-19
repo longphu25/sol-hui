@@ -16,7 +16,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (!isLoading) {
-      const isAuthPage = pathname.startsWith('/auth');
+      const isAuthPage = pathname?.startsWith('/auth') || false;
       
       if (!isAuthenticated && !isAuthPage) {
         router.push('/auth/sign-in');

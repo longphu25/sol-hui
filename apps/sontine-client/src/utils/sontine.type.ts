@@ -1,5 +1,5 @@
-export type SelectionMethod = { fixedOrder: {} } | { random: {} } | { auction: {} }
-export type CycleDuration = { weekly: {} } | { monthly: {} } | { custom: { duration: number } }
+export type SelectionMethod = { fixedOrder: object } | { random: object } | { auction: object }
+export type CycleDuration = { weekly: object } | { monthly: object } | { custom: { duration: number } }
 export type AuctionConfig = {
   auctionDuration: number
   minBidIncrement: number

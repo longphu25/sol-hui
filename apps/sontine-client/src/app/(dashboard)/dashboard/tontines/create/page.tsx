@@ -31,7 +31,7 @@ export default function CreateGroupPage() {
       setOpen(false);
       navigateBack();
     },
-    [addTontine, navigateBack]
+    [addTontine, navigateBack, walletAddress]
   );
 
   return (
