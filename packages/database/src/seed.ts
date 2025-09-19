@@ -3,7 +3,7 @@ import { prisma } from "./client"
 // Wallet and group addresses used in seed data
 const WALLET_ADDRESS_USER1 = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM';
 const WALLET_ADDRESS_USER2 = '8VzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWN';
-const GROUP_ONCHAIN_ADDRESS = 'GorkwbJYHK36X3nmEu9RY8rgZ9sFnudx9voNQskjiF67';
+const GROUP_ONCHAIN_ADDRESS = '9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1';
 
 async function main() {
   console.log('🌱 Starting database seed...')
@@ -35,10 +35,10 @@ async function main() {
 
   // Create sample group
   const group = await prisma.group.upsert({
-    where: { onChainAddress: 'GorkwbJYHK36X3nmEu9RY8rgZ9sFnudx9voNQskjiF67' },
+    where: { onChainAddress: '9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1' },
     update: {},
     create: {
-      onChainAddress: 'GorkwbJYHK36X3nmEu9RY8rgZ9sFnudx9voNQskjiF67',
+      onChainAddress: '9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1',
       name: 'Monthly Savings Group',
       description: 'A group for monthly savings and investment',
       maxMembers: 10,

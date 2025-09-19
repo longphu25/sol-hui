@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { AppProviders } from '@/components/app-providers';
 import { AuthGuard } from '@/components/auth/auth-guard';
 
 interface AppShellProps {
@@ -9,9 +8,5 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  return (
-    <AppProviders>
-      <AuthGuard>{children}</AuthGuard>
-    </AppProviders>
-  );
+  return <AuthGuard>{children}</AuthGuard>;
 }

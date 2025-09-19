@@ -44,7 +44,7 @@ import {
 } from '../instructions';
 
 export const SONTINE_PROGRAM_ADDRESS =
-  'GorkwbJYHK36X3nmEu9RY8rgZ9sFnudx9voNQskjiF67' as Address<'GorkwbJYHK36X3nmEu9RY8rgZ9sFnudx9voNQskjiF67'>;
+  '9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1' as Address<'9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1'>;
 
 export enum SontineAccount {
   AuctionRound,
@@ -443,7 +443,7 @@ export function identifySontineInstruction(
 }
 
 export type ParsedSontineInstruction<
-  TProgram extends string = 'GorkwbJYHK36X3nmEu9RY8rgZ9sFnudx9voNQskjiF67',
+  TProgram extends string = '9PZCzbuowY4pmsmJ4P6DAJm2jZVpxHbskKfpos3hVBo1',
 > =
   | ({
       instructionType: SontineInstruction.CancelGroup;

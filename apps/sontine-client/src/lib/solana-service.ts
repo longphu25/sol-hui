@@ -3,7 +3,8 @@ import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
 // USDC Token Address on Devnet
-const USDC_MINT_DEVNET = new PublicKey('4zMMC9sRT5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
+// const USDC_MINT_DEVNET = new PublicKey('4zMMC9sRT5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
+const USDC_MINT_DEVNET = new PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr');
 // USDC Token Address on Mainnet
 const USDC_MINT_MAINNET = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
 
