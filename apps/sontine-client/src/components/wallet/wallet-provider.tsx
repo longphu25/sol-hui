@@ -163,10 +163,10 @@ export function WalletProvider({ children }: WalletProviderProps) {
       const signature = await solanaService.requestAirdrop(account.publicKey, amount);
       setLastAirdropTx(signature);
       
-      // Refresh balance after successful airdrop
+      // Refresh balance after successful airdrop with longer delay to avoid rate limiting
       setTimeout(() => {
         refreshBalance();
-      }, 2000);
+      }, 3000);
       
       return signature;
     } catch (error) {
@@ -189,7 +189,12 @@ export function WalletProvider({ children }: WalletProviderProps) {
   // Auto-refresh on wallet connection change
   useEffect(() => {
     if (connected && account?.publicKey) {
-      refreshAll();
+      // Debounce the refresh to avoid multiple calls
+      const timeoutId = setTimeout(() => {
+        refreshAll();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
     } else {
       // Clear state when disconnected
       setBalance(null);
@@ -203,10 +208,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [connected, account?.publicKey, refreshAll]);
 
-  // Auto-refresh on cluster change
+  // Auto-refresh on cluster change (debounced)
   useEffect(() => {
     if (connected && account?.publicKey) {
-      refreshAll();
+      // Debounce cluster changes to avoid excessive refreshing
+      const timeoutId = setTimeout(() => {
+        refreshAll();
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [selectedCluster.id, connected, account?.publicKey, refreshAll]);
 

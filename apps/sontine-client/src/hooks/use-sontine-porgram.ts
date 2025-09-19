@@ -183,6 +183,8 @@ export function useSontineProgram() {
       )
     },
     enabled: !!sontineProgram,
+    staleTime: 1000 * 60 * 2, // 2 minutes for group accounts
+    refetchOnWindowFocus: false,
   })
 
   const groupViews = useMemo(() => {
@@ -630,6 +632,7 @@ export function useSontineProgram() {
       }
 
       try {
+        console.log('Fetching overview data - this is an expensive operation')
         const groupAccounts = await (sontineProgram.account as any).group.all()
         const fundsRaised = groupAccounts.reduce(
           (acc: number, account: { account: GroupAccountData }) => acc + account.account.currentMembers,
@@ -661,6 +664,10 @@ export function useSontineProgram() {
       }
     },
     enabled: !!sontineProgram,
+    staleTime: 1000 * 60 * 10, // 10 minutes for overview data - it doesn't change frequently
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })
 
   const placeBid = useMutation({

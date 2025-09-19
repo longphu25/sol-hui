@@ -48,8 +48,10 @@ export function useWebWallet() {
 
     // Sign a message to authenticate (similar to mobile app's sign-in payload)
     if (signMessage) {
+      // Generate timestamp only when actually signing to avoid hydration issues
+      const timestamp = Date.now();
       const message = new TextEncoder().encode(
-        `Sign in to ${AppConfig.appName}\n\nDomain: ${AppConfig.uri}\nTimestamp: ${Date.now()}`
+        `Sign in to ${AppConfig.appName}\n\nDomain: ${AppConfig.uri}\nTimestamp: ${timestamp}`
       );
       await signMessage(message);
     }

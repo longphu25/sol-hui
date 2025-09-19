@@ -53,11 +53,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     setAutoConnectPending(true);
-    const timeout = window.setTimeout(() => {
+    const timeout = setTimeout(() => {
       setAutoConnectPending(false);
     }, 2000);
 
-    return () => window.clearTimeout(timeout);
+    return () => clearTimeout(timeout);
   }, [autoConnect, wallet, connected, connecting]);
 
   const authenticatedAccount = account ?? signInMutation.data ?? null;
