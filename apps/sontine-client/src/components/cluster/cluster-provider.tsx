@@ -1,6 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useMemo,
+  useCallback,
+  useEffect,
+} from 'react';
 import { AppConfig, Cluster } from '@/constants/app-config';
 
 interface ClusterContextType {
@@ -15,14 +23,43 @@ interface ClusterProviderProps {
   children: ReactNode;
 }
 
-export function ClusterProvider({ children }: ClusterProviderProps) {
-  const [selectedCluster, setSelectedCluster] = useState<Cluster>(AppConfig.clusters[0]!);
+function loadInitialCluster(): Cluster {
+  if (typeof window === 'undefined') {
+    return AppConfig.clusters[0]!;
+  }
 
-  const value: ClusterContextType = {
-    clusters: [...AppConfig.clusters].sort((a, b) => (a.name > b.name ? 1 : -1)),
-    selectedCluster,
-    setSelectedCluster,
-  };
+  const persistedId = window.localStorage.getItem('sontine:selected-cluster-id');
+  const foundCluster = AppConfig.clusters.find((cluster) => cluster.id === persistedId);
+
+  return foundCluster ?? AppConfig.clusters[0]!;
+}
+
+export function ClusterProvider({ children }: ClusterProviderProps) {
+  const [selectedCluster, setSelectedClusterState] = useState<Cluster>(loadInitialCluster);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('sontine:selected-cluster-id', selectedCluster.id);
+    }
+  }, [selectedCluster.id]);
+
+  const sortedClusters = useMemo(
+    () => [...AppConfig.clusters].sort((a, b) => (a.name > b.name ? 1 : -1)),
+    []
+  );
+
+  const setSelectedCluster = useCallback((cluster: Cluster) => {
+    setSelectedClusterState(cluster);
+  }, []);
+
+  const value = useMemo<ClusterContextType>(
+    () => ({
+      clusters: sortedClusters,
+      selectedCluster,
+      setSelectedCluster,
+    }),
+    [sortedClusters, selectedCluster, setSelectedCluster]
+  );
 
   return (
     <ClusterContext.Provider value={value}>

@@ -26,8 +26,8 @@ export class AppConfig {
     {
       id: 'solana:devnet',
       name: 'Devnet',
-      // endpoint: 'https://devnet.helius-rpc.com/?api-key=b5f8c1a8-7580-49f7-8197-ed0d48aaa178',
-      endpoint: 'https://devnet.helius-rpc.com/?api-key=2d791b70-ca69-403d-8d5f-1eac0b0c1812',
+      endpoint: 'https://devnet.helius-rpc.com/?api-key=b5f8c1a8-7580-49f7-8197-ed0d48aaa178',
+      // endpoint: 'https://devnet.helius-rpc.com/?api-key=2d791b70-ca69-403d-8d5f-1eac0b0c1812',
       // endpoint:  clusterApiUrl('devnet'),
       network: ClusterNetwork.Devnet,
     },

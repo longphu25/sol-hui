@@ -97,27 +97,46 @@ export class SolanaService {
         limit,
       });
 
-      const transactions: RecentTransaction[] = [];
+      if (signatures.length === 0) {
+        return [];
+      }
 
-      for (const signatureInfo of signatures) {
+      const transactions: RecentTransaction[] = [];
+      const signatureValues = signatures.map((signatureInfo) => signatureInfo.signature);
+      const chunkSize = 20; // Helius recommends batching requests to reduce RPC load
+
+      for (let start = 0; start < signatureValues.length; start += chunkSize) {
+        const chunk = signatureValues.slice(start, start + chunkSize);
+
         try {
-          const transaction = await this.connection.getTransaction(signatureInfo.signature, {
+          const transactionBatch = await this.connection.getTransactions(chunk, {
             maxSupportedTransactionVersion: 0,
           });
 
-          if (transaction) {
-            const txData = this.parseTransaction(transaction, publicKey);
-            if (txData) {
-              transactions.push({
-                signature: signatureInfo.signature,
-                ...txData,
-                timestamp: (signatureInfo.blockTime || 0) * 1000, // Convert to milliseconds
-                status: signatureInfo.confirmationStatus || 'confirmed',
-              });
+          transactionBatch.forEach((transaction, index) => {
+            if (!transaction) {
+              return;
             }
-          }
+
+            const signatureInfo = signatures[start + index];
+            if (!signatureInfo) {
+              return;
+            }
+
+            const txData = this.parseTransaction(transaction as unknown as Record<string, unknown>, publicKey);
+            if (!txData) {
+              return;
+            }
+
+            transactions.push({
+              signature: signatureInfo.signature,
+              ...txData,
+              timestamp: (signatureInfo.blockTime || 0) * 1000,
+              status: signatureInfo.confirmationStatus || 'confirmed',
+            });
+          });
         } catch (error) {
-          console.error('Error parsing transaction:', error);
+          console.error('Error parsing transaction batch:', error);
         }
       }
 

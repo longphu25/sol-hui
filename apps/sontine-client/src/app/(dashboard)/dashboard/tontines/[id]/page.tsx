@@ -184,8 +184,26 @@ function buildActivityFeed(
 }
 
 export default function TontineDetailPage() {
-  const params = useParams();
-  const groupAddress = params.id as string;
+  const params = useParams<{ id?: string | string[] }>();
+  const groupAddress = React.useMemo(() => {
+    const raw = params?.id;
+    if (!raw) {
+      return '';
+    }
+    return Array.isArray(raw) ? raw[0] ?? '' : raw;
+  }, [params]);
+
+  const isGroupAddressValid = React.useMemo(() => {
+    if (!groupAddress) {
+      return false;
+    }
+    try {
+      new PublicKey(groupAddress);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [groupAddress]);
 
   const { account } = useAuth();
   const walletAddress = account?.address ?? null;
@@ -199,7 +217,7 @@ export default function TontineDetailPage() {
   const localTontine = getTontineById(groupAddress);
 
   const remoteGroupView = React.useMemo(() => {
-    if (!groupQuery.data) {
+    if (!groupQuery.data || !isGroupAddressValid) {
       return null;
     }
 
@@ -209,7 +227,7 @@ export default function TontineDetailPage() {
       console.error('Failed to map on-chain group', error);
       return null;
     }
-  }, [groupQuery.data, groupAddress]);
+  }, [groupQuery.data, groupAddress, isGroupAddressValid]);
 
   const remoteTontine = React.useMemo(
     () => (remoteGroupView ? groupViewToTontine(remoteGroupView) : null),
@@ -219,7 +237,26 @@ export default function TontineDetailPage() {
   const memberAccounts = React.useMemo(
     () => groupMembersQuery.data ?? [],
     [groupMembersQuery.data],
-  )
+  );
+
+  if (!groupAddress) {
+    return (
+      <div className="p-6">
+        <p className="text-gray-600">Loading tontine details...</p>
+      </div>
+    );
+  }
+
+  if (!isGroupAddressValid) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center space-x-2 text-red-600">
+          <AlertCircle className="h-5 w-5" />
+          <p>Invalid tontine address. Please check the link and try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   const tontine = localTontine ?? remoteTontine;
   const remoteMemberAddresses = React.useMemo(

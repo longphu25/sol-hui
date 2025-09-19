@@ -1,6 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  ReactNode,
+} from 'react';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { useWebWallet } from '@/components/solana/use-web-wallet';
 import { SolanaService, WalletBalance, RecentTransaction, TransactionSummary } from '@/lib/solana-service';
@@ -29,17 +38,21 @@ interface WalletContextType {
   lastAirdropTx: string | null;
   
   // Actions
-  refreshBalance: () => Promise<void>;
-  refreshTransactions: () => Promise<void>;
-  refreshSummary: () => Promise<void>;
+  refreshBalance: (options?: RefreshOptions) => Promise<void>;
+  refreshTransactions: (options?: RefreshOptions) => Promise<void>;
+  refreshSummary: (options?: RefreshOptions) => Promise<void>;
   requestAirdrop: (amount?: number) => Promise<string>;
-  refreshAll: () => Promise<void>;
+  refreshAll: (options?: RefreshOptions) => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 interface WalletProviderProps {
   children: ReactNode;
+}
+
+interface RefreshOptions {
+  force?: boolean;
 }
 
 function useOptionalConnection() {
@@ -80,71 +93,144 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const solanaService = useMemo(() => (connection ? new SolanaService(connection) : null), [connection]);
   const isMainnet = selectedCluster.network === ClusterNetwork.Mainnet;
 
+  const balanceRefreshTracker = useRef<{ last: number; promise: Promise<void> | null }>({
+    last: 0,
+    promise: null,
+  });
+  const transactionRefreshTracker = useRef<{ last: number; promise: Promise<void> | null }>({
+    last: 0,
+    promise: null,
+  });
+  const summaryRefreshTracker = useRef<{ last: number; promise: Promise<void> | null }>({
+    last: 0,
+    promise: null,
+  });
+
+  const resetRefreshTrackers = useCallback(() => {
+    balanceRefreshTracker.current = { last: 0, promise: null };
+    transactionRefreshTracker.current = { last: 0, promise: null };
+    summaryRefreshTracker.current = { last: 0, promise: null };
+  }, []);
+
   // Refresh functions
-  const refreshBalance = useCallback(async () => {
+  const refreshBalance = useCallback(async ({ force = false }: RefreshOptions = {}) => {
     if (!account?.publicKey || !connected || !solanaService) {
       setBalance(null);
       setBalanceError(null);
       return;
     }
 
+    const now = Date.now();
+    if (!force) {
+      if (balanceRefreshTracker.current.promise) {
+        return balanceRefreshTracker.current.promise;
+      }
+
+      if (now - balanceRefreshTracker.current.last < 15_000) {
+        return;
+      }
+    }
+
     setIsLoadingBalance(true);
     setBalanceError(null);
-    
-    try {
-      const newBalance = await solanaService.getWalletBalance(account.publicKey, isMainnet);
-      setBalance(newBalance);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch balance';
-      setBalanceError(errorMessage);
-      console.error('Error fetching balance:', error);
-    } finally {
-      setIsLoadingBalance(false);
-    }
+    balanceRefreshTracker.current.last = now;
+
+    const request = (async () => {
+      try {
+        const newBalance = await solanaService.getWalletBalance(account.publicKey, isMainnet);
+        setBalance(newBalance);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch balance';
+        setBalanceError(errorMessage);
+        console.error('Error fetching balance:', error);
+      } finally {
+        setIsLoadingBalance(false);
+        balanceRefreshTracker.current.promise = null;
+      }
+    })();
+
+    balanceRefreshTracker.current.promise = request;
+    return request;
   }, [account?.publicKey, connected, solanaService, isMainnet]);
 
-  const refreshTransactions = useCallback(async () => {
+  const refreshTransactions = useCallback(async ({ force = false }: RefreshOptions = {}) => {
     if (!account?.publicKey || !connected || !solanaService) {
       setTransactions([]);
       setTransactionsError(null);
       return;
     }
 
+    const now = Date.now();
+    if (!force) {
+      if (transactionRefreshTracker.current.promise) {
+        return transactionRefreshTracker.current.promise;
+      }
+
+      if (now - transactionRefreshTracker.current.last < 30_000) {
+        return;
+      }
+    }
+
     setIsLoadingTransactions(true);
     setTransactionsError(null);
-    
-    try {
-      const newTransactions = await solanaService.getRecentTransactions(account.publicKey);
-      setTransactions(newTransactions);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch transactions';
-      setTransactionsError(errorMessage);
-      console.error('Error fetching transactions:', error);
-    } finally {
-      setIsLoadingTransactions(false);
-    }
+    transactionRefreshTracker.current.last = now;
+
+    const request = (async () => {
+      try {
+        const newTransactions = await solanaService.getRecentTransactions(account.publicKey);
+        setTransactions(newTransactions);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch transactions';
+        setTransactionsError(errorMessage);
+        console.error('Error fetching transactions:', error);
+      } finally {
+        setIsLoadingTransactions(false);
+        transactionRefreshTracker.current.promise = null;
+      }
+    })();
+
+    transactionRefreshTracker.current.promise = request;
+    return request;
   }, [account?.publicKey, connected, solanaService]);
 
-  const refreshSummary = useCallback(async () => {
+  const refreshSummary = useCallback(async ({ force = false }: RefreshOptions = {}) => {
     if (!account?.publicKey || !connected || !solanaService) {
       setSummary(null);
       setSummaryError(null);
       return;
     }
 
+    const now = Date.now();
+    if (!force) {
+      if (summaryRefreshTracker.current.promise) {
+        return summaryRefreshTracker.current.promise;
+      }
+
+      if (now - summaryRefreshTracker.current.last < 45_000) {
+        return;
+      }
+    }
+
     setIsLoadingSummary(true);
     setSummaryError(null);
-    
-    try {
-      const newSummary = await solanaService.getTransactionSummary(account.publicKey);
-      setSummary(newSummary);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch summary';
-      setSummaryError(errorMessage);
-      console.error('Error fetching summary:', error);
-    } finally {
-      setIsLoadingSummary(false);
-    }
+    summaryRefreshTracker.current.last = now;
+
+    const request = (async () => {
+      try {
+        const newSummary = await solanaService.getTransactionSummary(account.publicKey);
+        setSummary(newSummary);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch summary';
+        setSummaryError(errorMessage);
+        console.error('Error fetching summary:', error);
+      } finally {
+        setIsLoadingSummary(false);
+        summaryRefreshTracker.current.promise = null;
+      }
+    })();
+
+    summaryRefreshTracker.current.promise = request;
+    return request;
   }, [account?.publicKey, connected, solanaService]);
 
   const requestAirdrop = useCallback(async (amount = 1): Promise<string> => {
@@ -165,7 +251,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       
       // Refresh balance after successful airdrop with longer delay to avoid rate limiting
       setTimeout(() => {
-        refreshBalance();
+        void refreshBalance({ force: true });
       }, 3000);
       
       return signature;
@@ -178,20 +264,24 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [account?.publicKey, connected, isMainnet, solanaService, refreshBalance]);
 
-  const refreshAll = useCallback(async () => {
-    await Promise.all([
-      refreshBalance(),
-      refreshTransactions(),
-      refreshSummary(),
-    ]);
-  }, [refreshBalance, refreshTransactions, refreshSummary]);
+  const refreshAll = useCallback(
+    async (options?: RefreshOptions) => {
+      await Promise.all([
+        refreshBalance(options),
+        refreshTransactions(options),
+        refreshSummary(options),
+      ]);
+    },
+    [refreshBalance, refreshTransactions, refreshSummary]
+  );
 
   // Auto-refresh on wallet connection change
   useEffect(() => {
     if (connected && account?.publicKey) {
+      resetRefreshTrackers();
       // Debounce the refresh to avoid multiple calls
       const timeoutId = setTimeout(() => {
-        refreshAll();
+        void refreshAll({ force: true });
       }, 100);
       
       return () => clearTimeout(timeoutId);
@@ -205,20 +295,22 @@ export function WalletProvider({ children }: WalletProviderProps) {
       setSummaryError(null);
       setAirdropError(null);
       setLastAirdropTx(null);
+      resetRefreshTrackers();
     }
-  }, [connected, account?.publicKey, refreshAll]);
+  }, [connected, account?.publicKey, refreshAll, resetRefreshTrackers]);
 
   // Auto-refresh on cluster change (debounced)
   useEffect(() => {
     if (connected && account?.publicKey) {
+      resetRefreshTrackers();
       // Debounce cluster changes to avoid excessive refreshing
       const timeoutId = setTimeout(() => {
-        refreshAll();
+        void refreshAll({ force: true });
       }, 300);
       
       return () => clearTimeout(timeoutId);
     }
-  }, [selectedCluster.id, connected, account?.publicKey, refreshAll]);
+  }, [selectedCluster.id, connected, account?.publicKey, refreshAll, resetRefreshTrackers]);
 
   const value: WalletContextType = {
     // Balance state

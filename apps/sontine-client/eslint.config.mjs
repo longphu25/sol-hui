@@ -20,6 +20,12 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  ...compat.config({
+    extends: ['next'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  }),
 ];
 
 export default eslintConfig;

@@ -17,7 +17,7 @@ const navItems = [
 ];
 
 export function DashboardNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const { signOut, account } = useAuth();
 
   const isActive = (href: string) => {
