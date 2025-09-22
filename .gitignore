@@ -38,3 +38,4 @@ dist/
 android/
 app-keypair
 packages/database/.env
+.vercel
